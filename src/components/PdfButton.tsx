@@ -5,6 +5,7 @@ import type { Diagnostic } from "@/types/diagnostic";
 import { Icon } from "@/components/Icon";
 import { secondaryButtonClass } from "@/components/ui";
 import { track } from "@/lib/analytics";
+import { BRAND } from "@/lib/brand";
 
 function fileName(name: string) {
   // Sem acentos: alguns navegadores trocam nomes com acento por "download".
@@ -14,7 +15,7 @@ function fileName(name: string) {
       .replace(/[\u0300-\u036f]/g, "")
       .replace(/[^\w .-]+/g, "")
       .trim() || "relatorio";
-  return `Raio-X do Dinheiro - ${safe}.pdf`;
+  return `${BRAND.fileSlug} - ${safe}.pdf`;
 }
 
 /** Baixa o relatório em PDF, montado com os números desta pessoa. */
@@ -58,7 +59,7 @@ export function PdfButton({
       ) : (
         <Icon name="download" />
       )}
-      {busy ? "Gerando seu PDF…" : "Baixar meu Raio-X em PDF"}
+      {busy ? "Gerando seu PDF…" : "Baixar meu Mapa em PDF"}
     </button>
   );
 }

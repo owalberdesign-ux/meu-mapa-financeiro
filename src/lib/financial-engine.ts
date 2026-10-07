@@ -1,5 +1,5 @@
 /**
- * Motor financeiro do Raio-X: todas as fórmulas e regras de pontuação ficam aqui
+ * Motor financeiro do Meu Mapa Financeiro: todas as fórmulas e regras de pontuação ficam aqui
  * (briefing, seções 16 a 25 e 33 a 34). Componentes só leem o resultado.
  */
 import type {
@@ -148,4 +148,36 @@ export function buildProjection(m: Metrics, reductionTarget: number): Projection
     sixMonths: monthlyPotential * 6,
     twelveMonths: monthlyPotential * 12,
   };
+}
+
+/** Base da reserva: gastos essenciais do mês (ou o total, se não houver). */
+export function reserveBase(m: Metrics): number {
+  return m.fixedExpenses || m.totalExpenses;
+}
+
+/**
+ * Respostas simuladas ao fim do plano: 12% a menos nos não essenciais e o que
+ * esse corte deixar livre indo para a poupança. Dívida e reserva não mudam.
+ */
+export function answersAfterPlan(a: Answers): Answers {
+  const m = calculateFinancialMetrics(a);
+  const cut = variableReductionTarget(a.variable);
+  const freed = Math.max(0, Math.min(cut, m.monthlyMargin + cut));
+  return { ...a, variable: a.variable - cut, saving: a.saving + freed };
+}
+
+export function scoreForAnswers(a: Answers): number {
+  const m = calculateFinancialMetrics(a);
+  const points = Object.values(calculateFinancialScore(m)).reduce((s, v) => s + v, 0);
+  return applyScoreCaps(points, m);
+}
+
+/** Próximo limite de faixa da poupança acima da taxa atual (seção 21). */
+export function nextSavingBand(savingRate: number): number | null {
+  return [0.01, 0.05, 0.1, 0.2].find((t) => savingRate < t) ?? null;
+}
+
+/** Próximo limite de faixa da reserva, em meses, acima do atual (seção 22). */
+export function nextReserveBand(reserveMonths: number): number | null {
+  return [0.5, 1, 3, 6].find((t) => reserveMonths < t) ?? null;
 }

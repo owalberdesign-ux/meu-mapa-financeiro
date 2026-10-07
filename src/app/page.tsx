@@ -11,7 +11,7 @@ import {
   TileAlerts,
   TilePdf,
   TilePlan,
-  TileProjection,
+  TileRoute,
   TileScore,
 } from "@/components/landing/illustrations";
 import { StickyCta } from "@/components/landing/StickyCta";
@@ -20,10 +20,10 @@ import { DISCLAIMER } from "@/lib/legal";
 
 const HERO_BENEFITS = [
   "Score financeiro de 0 a 100",
-  "Principais pontos de atenção",
-  "Projeção da sua situação financeira",
-  "Plano personalizado de 30 dias",
-  "Relatório completo em PDF",
+  "Pontos de atenção com o primeiro passo",
+  "Rota com prazos até o seu objetivo",
+  "Plano de 30 dias com metas semanais",
+  "Mapa completo em PDF",
 ];
 
 const PAINS: { icon: IconName; title: string; text: string }[] = [
@@ -56,29 +56,29 @@ const STEPS: { title: string; text: string; art: ReactNode }[] = [
     art: <StepDiscover />,
   },
   {
-    title: "Organize",
-    text: "Receba seu diagnóstico completo e um plano de ação de 30 dias.",
+    title: "Siga a rota",
+    text: "Receba seu diagnóstico completo, a rota até o seu objetivo e um plano de 30 dias com tarefas.",
     art: <StepOrganize />,
   },
 ];
 
 const ALSO_INCLUDED = [
   "Perfil financeiro",
-  "Renda x despesas",
-  "Margem mensal",
-  "Percentual da renda comprometida",
-  "Peso dos parcelamentos",
-  "Situação das dívidas",
-  "Taxa de poupança",
-  "Reserva disponível",
+  "Pilares do score",
+  "Para onde vai sua renda",
+  "7 indicadores com referência",
+  "Alavancas do seu mês",
+  "Score possível em 30 dias",
+  "Projeção de 3, 6 e 12 meses",
+  "Seus pontos fortes",
 ];
 
 const UNLOCKS = [
-  "Seus 3 maiores pontos de atenção",
-  "Quanto você pode recuperar por mês",
-  "Sua projeção de 3, 6 e 12 meses",
-  "Seu plano personalizado de 30 dias",
-  "Seu relatório completo em PDF",
+  "Seus pontos de atenção, com o primeiro passo",
+  "Quanto você pode recuperar e o seu score possível",
+  "Sua rota até o objetivo, com prazos",
+  "Plano de 30 dias com tarefas e metas semanais",
+  "Seu Mapa completo em PDF, com 8 páginas",
 ];
 
 const OFFER_INFO: { icon: IconName; text: string }[] = [
@@ -93,7 +93,7 @@ const FAQ = [
     q: "Preciso conectar minha conta bancária?",
     a: "Não. O diagnóstico é criado apenas com as informações que você fornece.",
   },
-  { q: "O Raio-X acessa meu banco?", a: "Não." },
+  { q: "O Meu Mapa Financeiro acessa meu banco?", a: "Não." },
   {
     q: "É uma consultoria financeira?",
     a: "Não. É uma ferramenta educacional de diagnóstico e organização financeira baseada nos dados informados pelo usuário.",
@@ -178,7 +178,7 @@ export default function LandingPage() {
           href="/diagnostico"
           className="rounded-xl px-3 py-2 text-sm font-semibold whitespace-nowrap text-brand-strong hover:bg-brand-soft max-[399px]:hidden"
         >
-          Fazer meu Raio-X
+          Fazer meu Mapa
         </Link>
       </header>
 
@@ -220,7 +220,7 @@ export default function LandingPage() {
                 ))}
               </ul>
               <div id="hero-cta" className="mt-8">
-                <StartLink>Fazer meu Raio-X</StartLink>
+                <StartLink>Fazer meu Mapa Financeiro</StartLink>
                 <p className="mt-3 flex items-center gap-2 text-sm text-muted">
                   <Icon name="shield" className="size-4 shrink-0 text-brand-strong" />
                   Leva cerca de 3 minutos. Sem conectar sua conta bancária.
@@ -288,8 +288,8 @@ export default function LandingPage() {
             <SectionHeading
               dark
               eyebrow="O que você recebe"
-              title="Seu Raio-X mostra o que os números estão dizendo."
-              text="Um relatório feito a partir das suas respostas, com cada número explicado e o que fazer com ele."
+              title="Seu Mapa mostra onde você está e a rota até onde quer chegar."
+              text="Feito a partir das suas respostas: cada número explicado, cada etapa com prazo e cada semana com tarefas."
             />
             <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:grid-rows-2">
               <Tile
@@ -299,17 +299,17 @@ export default function LandingPage() {
               >
                 <TileScore />
               </Tile>
-              <Tile title="3 principais pontos de atenção" text="O que mais pesa no seu mês, em ordem.">
+              <Tile title="Pontos de atenção com o primeiro passo" text="O que mais pesa no seu mês, em reais, e por onde começar.">
                 <TileAlerts />
               </Tile>
-              <Tile title="Projeção de 3, 6 e 12 meses" text="Quanto pode ficar com você com ajustes possíveis.">
-                <TileProjection />
+              <Tile title="Sua rota com prazos" text="Do ponto em que você está até o seu objetivo, etapa por etapa.">
+                <TileRoute />
               </Tile>
-              <Tile title="Plano de ação de 30 dias" text="Uma tarefa clara para cada semana.">
+              <Tile title="Plano de 30 dias" text="Objetivo, tarefas com os seus números e uma meta para cada semana.">
                 <TilePlan />
               </Tile>
-              <Tile title="PDF personalizado" text="Seu relatório para salvar, imprimir ou rever depois.">
-                <div className="grid h-full min-h-48 place-items-center">
+              <Tile title="PDF de 8 páginas" text="Com o seu nome e os seus números, para salvar e acompanhar.">
+                <div className="grid h-full min-h-52 place-items-center">
                   <TilePdf />
                 </div>
               </Tile>
@@ -347,7 +347,7 @@ export default function LandingPage() {
                 Pagamento único
               </p>
               <h2 className="mt-3 text-[2rem] font-semibold leading-tight tracking-tight sm:text-4xl">
-                Desbloqueie seu Raio-X completo
+                Desbloqueie seu Mapa Financeiro completo
               </h2>
               <p className="mt-6 flex items-start gap-1.5 leading-none">
                 <span className="mt-3 text-2xl font-medium text-white/70">R$</span>
@@ -358,7 +358,7 @@ export default function LandingPage() {
                 plano simples para os próximos 30 dias.
               </p>
               <div className="mt-8">
-                <StartLink full>Quero ver meu Raio-X completo</StartLink>
+                <StartLink full>Quero ver meu Mapa completo</StartLink>
               </div>
               <ul className="mt-6 grid gap-3 text-[14px] text-white/75 sm:grid-cols-2">
                 {OFFER_INFO.map((o) => (
@@ -414,7 +414,7 @@ export default function LandingPage() {
         <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
           <Logo />
           <p className="mt-5 max-w-3xl text-[13px] leading-relaxed text-muted">{DISCLAIMER}</p>
-          <p className="mt-4 text-[13px] text-muted">© 2026 Raio-X do Dinheiro</p>
+          <p className="mt-4 text-[13px] text-muted">© 2026 Meu Mapa Financeiro</p>
         </div>
       </footer>
     </>

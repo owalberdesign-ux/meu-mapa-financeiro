@@ -4,7 +4,7 @@ import { Logo } from "@/components/ui";
 import { SAMPLE_DIAGNOSTIC } from "@/lib/sample";
 
 export const metadata: Metadata = {
-  title: "Exemplo de relatório — Raio-X do Dinheiro",
+  title: "Exemplo de relatório — Meu Mapa Financeiro",
   robots: { index: false, follow: false },
 };
 

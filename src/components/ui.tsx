@@ -18,11 +18,11 @@ export function Logo({ href = "/" }: { href?: string }) {
     <Link
       href={href}
       className="inline-flex items-center gap-2.5 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-strong"
-      aria-label="Raio-X do Dinheiro — início"
+      aria-label="Meu Mapa Financeiro — início"
     >
       <LogoMark />
       <span className="text-[15px] font-semibold tracking-tight whitespace-nowrap">
-        Raio-X <span className="font-normal text-muted">do Dinheiro</span>
+        Meu Mapa <span className="font-normal text-muted">Financeiro</span>
       </span>
     </Link>
   );
@@ -33,13 +33,16 @@ export function LogoMark({ className = "size-8" }: { className?: string }) {
     <svg viewBox="0 0 32 32" className={className} aria-hidden="true">
       <rect width="32" height="32" rx="9" fill="#141714" />
       <path
-        d="M6.5 17h4.5l2.5-6 4.5 11 2.5-5h5"
+        d="M8.5 23.5c4.5 0 3.5-8 8-8s3.5-6 7-6"
         fill="none"
         stroke="#22c55e"
-        strokeWidth="2.4"
+        strokeWidth="2.2"
         strokeLinecap="round"
-        strokeLinejoin="round"
+        strokeDasharray="0.1 4.2"
       />
+      <circle cx="8.5" cy="23.5" r="2.2" fill="#ffffff" />
+      <circle cx="23.5" cy="9.5" r="3.4" fill="#22c55e" />
+      <circle cx="23.5" cy="9.5" r="1.3" fill="#141714" />
     </svg>
   );
 }

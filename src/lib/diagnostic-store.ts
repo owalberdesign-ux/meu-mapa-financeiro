@@ -42,12 +42,20 @@ export async function createDiagnostic(input: {
   return diagnostic;
 }
 
+/** Relatórios salvos numa versão anterior são refeitos a partir das respostas. */
+function upgrade(diagnostic: Diagnostic): Diagnostic {
+  if (diagnostic.report?.version === 2) return diagnostic;
+  const upgraded = { ...diagnostic, report: buildReport(diagnostic.answers) };
+  persist(upgraded);
+  return upgraded;
+}
+
 export async function getDiagnostic(id: string): Promise<Diagnostic | null> {
   const cached = memory.get(id);
   if (cached) return cached;
   try {
     const raw = localStorage.getItem(key(id));
-    return raw ? (JSON.parse(raw) as Diagnostic) : null;
+    return raw ? upgrade(JSON.parse(raw) as Diagnostic) : null;
   } catch {
     return null;
   }

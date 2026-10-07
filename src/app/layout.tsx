@@ -8,9 +8,9 @@ const geist = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "Raio-X do Dinheiro — descubra por que seu dinheiro não sobra",
+  title: "Meu Mapa Financeiro — descubra por que seu dinheiro não sobra e a rota para mudar isso",
   description:
-    "Responda algumas perguntas e receba seu score financeiro, os pontos de atenção e um plano personalizado para os próximos 30 dias. Sem conectar sua conta bancária.",
+    "Responda algumas perguntas e receba seu score financeiro, os pontos de atenção, a rota até o seu objetivo e um plano personalizado para os próximos 30 dias. Sem conectar sua conta bancária.",
 };
 
 export const viewport: Viewport = {

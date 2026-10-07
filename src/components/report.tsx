@@ -12,6 +12,7 @@ import {
   PRIMARY_PROBLEM_TEXT,
   PRIORITY_LABEL,
   PROFILE_LABEL,
+  PROFILE_TONE,
 } from "@/lib/report-builder";
 
 function problemTone(problem: PrimaryProblem): Tone {
@@ -33,6 +34,8 @@ function SectionTitle({ index, children }: { index: string; children: ReactNode 
     </div>
   );
 }
+
+const money = (v: number) => (v < 0 ? `−${brl(-v)}` : brl(v));
 
 function MarginValue({ margin }: { margin: number }) {
   return (
@@ -97,11 +100,11 @@ function lockedItems(report: Report): string[] {
         ? "Seu principal ponto de atenção"
         : `Seus ${n} maiores pontos de atenção`;
   return [
-    attention,
-    "Quanto você pode recuperar por mês",
-    "Sua projeção de 3, 6 e 12 meses",
-    "Seu plano personalizado de 30 dias",
-    "Seu relatório completo em PDF",
+    n > 0 ? `${attention}, com o primeiro passo de cada um` : attention,
+    "Quanto você pode recuperar por mês e o seu score possível",
+    "Sua rota até o seu objetivo, com prazos",
+    "Seu plano de 30 dias com tarefas e metas por semana",
+    "Seu Mapa completo em PDF",
   ];
 }
 
@@ -115,8 +118,8 @@ export function LockedReport({
 }) {
   const heading =
     report.alerts.length > 0
-      ? "Seu Raio-X completo encontrou pontos que podem estar impedindo seu dinheiro de sobrar."
-      : "Seu Raio-X completo mostra como transformar sua margem em reserva.";
+      ? "Seu Mapa completo encontrou pontos que podem estar impedindo seu dinheiro de sobrar."
+      : "Seu Mapa completo mostra a rota para transformar sua margem em reserva.";
   return (
     <div className="rounded-[2rem] bg-ink p-6 text-white sm:p-8">
       <h2 className="text-2xl font-semibold leading-snug tracking-tight text-balance">{heading}</h2>
@@ -141,7 +144,7 @@ export function ReadyBanner({ diagnostic }: { diagnostic: Diagnostic }) {
       <span className="grid size-11 place-items-center rounded-2xl bg-brand text-ink">
         <Icon name="good" className="size-6" />
       </span>
-      <h1 className="mt-5 text-3xl font-semibold tracking-tight">Seu Raio-X está pronto.</h1>
+      <h1 className="mt-5 text-3xl font-semibold tracking-tight">Seu Mapa Financeiro está pronto.</h1>
       <p className="mt-2 text-white/75">
         {firstName(diagnostic.name)}, seu diagnóstico completo foi liberado.
       </p>
@@ -185,7 +188,14 @@ function AlertsSection({ report }: { report: Report }) {
           </div>
           <h3 className="mt-4 text-xl font-semibold tracking-tight">{alert.title}</h3>
           <p className="mt-1 text-[17px] font-semibold">{alert.figure}</p>
-          <p className="mt-2 leading-relaxed text-muted">{alert.text}</p>
+          <p className="mt-2 leading-relaxed">{alert.analysis}</p>
+          <p className="mt-3 flex items-start gap-2 rounded-xl bg-surface/80 px-3.5 py-3 text-[15px]">
+            <Icon name="arrowRight" className="mt-0.5 size-4 shrink-0 text-brand-strong" />
+            <span>
+              <span className="font-semibold text-brand-deep">Primeiro passo: </span>
+              {alert.firstStep}
+            </span>
+          </p>
         </li>
       ))}
     </ol>
@@ -282,6 +292,100 @@ function DistributionSection({ diagnostic }: { diagnostic: Diagnostic }) {
   );
 }
 
+function OutlookAndLevers({ report }: { report: Report }) {
+  const { outlook, levers } = report;
+  return (
+    <div className="grid gap-4 lg:grid-cols-2">
+      <Card className="print:break-inside-avoid">
+        <h3 className="text-lg font-semibold">Seu score possível em 30 dias</h3>
+        <p className="mt-1 text-sm text-muted">Se você fizer o ajuste sugerido e guardar o que ele liberar.</p>
+        {outlook.hint ? (
+          <p className="mt-4 leading-relaxed">
+            <span className="text-3xl font-semibold tracking-tighter">{outlook.scoreNow}</span>
+            <span className="mt-2 block">{outlook.hint}</span>
+          </p>
+        ) : (
+        <div className="mt-5 flex items-center gap-4">
+          <div>
+            <p className="text-[13px] text-muted">Hoje</p>
+            <p className="text-4xl font-semibold tracking-tighter">{outlook.scoreNow}</p>
+          </div>
+          <Icon name="arrowRight" className="size-6 text-muted" />
+          <div>
+            <p className="text-[13px] text-muted">Possível</p>
+            <p className="text-4xl font-semibold tracking-tighter text-brand-strong">{outlook.scoreAfter}</p>
+          </div>
+          <div className="ml-auto">
+            <StatusBadge tone={PROFILE_TONE[outlook.profileAfter]}>{PROFILE_LABEL[outlook.profileAfter]}</StatusBadge>
+          </div>
+        </div>
+        )}
+      </Card>
+      {levers.length ? (
+        <Card className="print:break-inside-avoid">
+          <h3 className="text-lg font-semibold">O que mais move o seu mês</h3>
+          <p className="mt-1 text-sm text-muted">Quanto cada mudança soma à sua sobra mensal.</p>
+          <ul className="mt-3 divide-y divide-line">
+            {levers.map((l) => (
+              <li key={l.label} className="flex items-baseline justify-between gap-3 py-3">
+                <span className="text-[15px]">{l.label}</span>
+                <span className="text-right">
+                  <span className="text-[17px] font-semibold text-brand-strong">+{brl(l.monthly)}</span>
+                  <span className="block text-[12px] text-muted">sobra vai a {money(l.marginAfter)}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      ) : null}
+    </div>
+  );
+}
+
+function RouteSection({ report }: { report: Report }) {
+  const m = report.metrics;
+  return (
+    <Card className="print:break-inside-avoid">
+      <ol className="relative">
+        <li className="relative flex gap-4 pb-6">
+          <span className="absolute top-8 bottom-0 left-[15px] border-l-2 border-dashed border-line" aria-hidden="true" />
+          <span className="relative grid size-8 shrink-0 place-items-center rounded-full bg-ink text-white">
+            <Icon name="good" className="size-4" />
+          </span>
+          <div>
+            <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-muted">Você está aqui</p>
+            <p className="mt-1 text-[17px] font-semibold">
+              Score {report.score} · {m.monthlyMargin < 0 ? "faltam" : "sobram"} {brl(Math.abs(m.monthlyMargin))} por mês
+            </p>
+          </div>
+        </li>
+        {report.route.map((step, i) => {
+          const last = i === report.route.length - 1;
+          return (
+            <li key={step.key} className="relative flex gap-4 pb-6 last:pb-0">
+              {!last ? (
+                <span className="absolute top-8 bottom-0 left-[15px] border-l-2 border-dashed border-brand/50" aria-hidden="true" />
+              ) : null}
+              <span
+                className={`relative grid size-8 shrink-0 place-items-center rounded-full text-[13px] font-bold ${
+                  last ? "bg-brand text-ink" : "bg-brand-soft text-brand-deep"
+                }`}
+              >
+                {last ? <Icon name="check" className="size-4" strokeWidth={3} /> : i + 1}
+              </span>
+              <div>
+                <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-brand-strong">{step.horizon}</p>
+                <p className="mt-1 text-[17px] font-semibold">{step.title}</p>
+                <p className="mt-0.5 leading-relaxed text-muted">{step.detail}</p>
+              </div>
+            </li>
+          );
+        })}
+      </ol>
+    </Card>
+  );
+}
+
 function ProjectionSection({ report }: { report: Report }) {
   const p = report.projection;
   const deficit = report.metrics.monthlyMargin < 0;
@@ -317,16 +421,24 @@ function PlanSection({ report }: { report: Report }) {
   return (
     <>
       <p className="-mt-2 mb-4 text-muted">{PLAN_TITLE[report.planFocus]}</p>
-      <ol className="grid gap-3 sm:grid-cols-2">
+      <ol className="grid gap-3 lg:grid-cols-2">
         {report.plan30d.map((w) => (
-          <li key={w.week} className="rounded-2xl border border-line bg-surface p-5 print:break-inside-avoid">
-            <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-brand-strong">
-              Semana {w.week}
+          <li key={w.week} className="flex flex-col rounded-2xl border border-line bg-surface p-5 print:break-inside-avoid">
+            <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-brand-strong">Semana {w.week}</p>
+            <h3 className="mt-1 text-xl font-semibold tracking-tight">{w.title}</h3>
+            <p className="mt-1 text-[15px] leading-relaxed text-muted">{w.goal}</p>
+            <ul className="mt-4 space-y-2.5">
+              {w.actions.map((action) => (
+                <li key={action} className="flex gap-3 text-[15px] leading-relaxed">
+                  <span className="mt-0.5 size-5 shrink-0 rounded-md border-2 border-line" aria-hidden="true" />
+                  {action}
+                </li>
+              ))}
+            </ul>
+            <p className="mt-4 rounded-xl bg-brand-soft/60 px-3.5 py-3 text-[15px]">
+              <span className="font-semibold text-brand-deep">Meta da semana: </span>
+              {w.target}
             </p>
-            <p className="mt-2 text-[17px] leading-relaxed">{w.text}</p>
-            {w.detail ? (
-              <p className="mt-3 rounded-xl bg-canvas px-3 py-2 text-[15px] font-medium">{w.detail}</p>
-            ) : null}
           </li>
         ))}
       </ol>
@@ -340,7 +452,7 @@ function PrintCover({ diagnostic }: { diagnostic: Diagnostic }) {
     <section className="hidden h-[255mm] flex-col justify-between print:flex">
       <div className="flex items-center gap-3">
         <LogoMark className="size-10" />
-        <p className="text-sm font-semibold uppercase tracking-[0.14em]">Raio-X do Dinheiro</p>
+        <p className="text-sm font-semibold uppercase tracking-[0.14em]">Meu Mapa Financeiro</p>
       </div>
       <div>
         <p className="text-lg text-muted">Diagnóstico de</p>
@@ -423,12 +535,20 @@ export function FullReport({ diagnostic }: { diagnostic: Diagnostic }) {
       </section>
 
       <section className="print:break-before-page">
-        <SectionTitle index="05">Projeção</SectionTitle>
-        <ProjectionSection report={report} />
+        <SectionTitle index="05">Projeção e score possível</SectionTitle>
+        <div className="space-y-4">
+          <ProjectionSection report={report} />
+          <OutlookAndLevers report={report} />
+        </div>
       </section>
 
       <section className="print:break-before-page">
-        <SectionTitle index="06">Plano de 30 dias</SectionTitle>
+        <SectionTitle index="06">Sua rota</SectionTitle>
+        <RouteSection report={report} />
+      </section>
+
+      <section className="print:break-before-page">
+        <SectionTitle index="07">Plano de 30 dias</SectionTitle>
         <PlanSection report={report} />
       </section>
 

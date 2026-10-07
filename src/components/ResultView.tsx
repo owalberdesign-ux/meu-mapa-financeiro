@@ -120,7 +120,7 @@ function Preview({
                 </>
               ) : (
                 <>
-                  Desbloquear meu Raio-X — {PRICE_LABEL}
+                  Desbloquear meu Mapa — {PRICE_LABEL}
                   <Icon name="arrowRight" />
                 </>
               )}
@@ -148,11 +148,11 @@ function Missing() {
     <div className="pt-10 text-center">
       <h1 className="text-2xl font-semibold tracking-tight">Não encontramos este diagnóstico.</h1>
       <p className="mx-auto mt-3 max-w-md text-muted">
-        Ele pode ter sido feito em outro aparelho ou navegador. Refaça o quiz para gerar um novo Raio-X.
+        Ele pode ter sido feito em outro aparelho ou navegador. Refaça o quiz para gerar um novo Mapa.
       </p>
       <div className="mt-8">
         <Link href="/diagnostico" className={buttonClass}>
-          Fazer meu Raio-X
+          Fazer meu Mapa
           <Icon name="arrowRight" />
         </Link>
       </div>

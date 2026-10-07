@@ -1,9 +1,11 @@
-# Raio-X do Dinheiro
+# Meu Mapa Financeiro
 
 Diagnóstico financeiro personalizado de R$37: a pessoa responde um quiz curto, vê o score e o
-pré-diagnóstico de graça e desbloqueia o relatório completo (com PDF) pelo checkout da Kiwify.
+pré-diagnóstico de graça e desbloqueia o Mapa completo (relatório + PDF) pelo checkout da Kiwify.
+O Mapa mostra onde a pessoa está, o que mais pesa no mês, a rota com prazos até o objetivo e um
+plano de 30 dias com tarefas e metas.
 
-Especificação completa: [`docs/briefing.md`](docs/briefing.md).
+Especificação de origem: [`docs/briefing.md`](docs/briefing.md) (do tempo em que se chamava Raio-X do Dinheiro).
 
 ## Rodar
 
@@ -28,7 +30,8 @@ npm run build
 | Arquivo | Responsabilidade |
 |---|---|
 | `src/lib/financial-engine.ts` | Métricas, score, limites, perfil, problema principal, alertas, projeção |
-| `src/lib/report-builder.ts` | Textos dos alertas, plano de 30 dias e montagem do relatório (`report_data`) |
+| `src/lib/report-builder.ts` | Pontos de atenção (leitura + primeiro passo), metas, plano de 30 dias, rota, alavancas, score possível e montagem do relatório (`report_data`, versão 2) |
+| `src/lib/brand.ts` | Nome do produto |
 | `src/lib/checkout.ts` | `buildCheckoutUrl` — único lugar com a URL da Kiwify (`s1` = ID do diagnóstico) |
 | `src/lib/diagnostic-store.ts` | Onde o diagnóstico fica salvo (hoje no navegador; fase 2: Supabase) |
 | `src/lib/analytics.ts` | Eventos do funil (`view_landing` … `download_pdf`) no `dataLayer`, prontos para Pixel/GA |
@@ -42,9 +45,11 @@ npm run build
 - Tudo calculado no navegador; o diagnóstico fica salvo no aparelho da pessoa.
 - Sem `NEXT_PUBLIC_KIWIFY_CHECKOUT_URL`, o botão de compra **simula o pagamento** (modo prévia) para
   mostrar a entrega. Com a variável preenchida, o botão leva ao checkout com `name`, `email` e `s1`.
-- PDF: botão "Baixar meu Raio-X em PDF" gera um arquivo A4 de 7 páginas com os números da pessoa
-  (capa, resultado, renda, indicadores, pontos de atenção, projeção, plano). O layout é fixo; textos,
-  cores de estado, gráficos e plano mudam conforme as respostas. Se a geração falhar, cai na impressão.
+- PDF: botão "Baixar meu Mapa em PDF" gera um arquivo A4 de 8 páginas com os números da pessoa
+  (capa, resultado, renda, indicadores, pontos de atenção, projeção e alavancas, rota, plano de 30 dias).
+  O layout é fixo; textos, estados, gráficos, rota e plano mudam conforme as respostas. Se a geração
+  falhar, cai na impressão.
+- Diagnósticos salvos numa versão anterior do relatório são refeitos a partir das respostas ao abrir.
 - Fonte do PDF: Geist (SIL OFL) em `public/fonts`.
 
 ## Próxima etapa

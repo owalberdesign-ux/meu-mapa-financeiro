@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { ResultSkeleton, ResultView } from "@/components/ResultView";
 
 export const metadata: Metadata = {
-  title: "Seu Raio-X do Dinheiro",
+  title: "Seu Mapa Financeiro",
   robots: { index: false, follow: false },
 };
 

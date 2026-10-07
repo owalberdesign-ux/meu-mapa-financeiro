@@ -11,7 +11,6 @@ import {
   PROFILE_TONE,
 } from "@/lib/report-builder";
 import {
-  FIRST_STEP,
   buildIndicators,
   incomeSlices,
   projectionScenarios,
@@ -33,6 +32,7 @@ const SECTIONS: [string, string][] = [
   ["indicadores", "Seus indicadores"],
   ["atencao", "Pontos de atenção"],
   ["projecao", "Potencial de ajuste e projeção"],
+  ["rota", "Sua rota"],
   ["plano", "Plano de 30 dias"],
 ];
 
@@ -59,7 +59,7 @@ function Cover({ d }: { d: Diagnostic }) {
         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             <LogoMark size={24} />
-            <Text style={{ marginLeft: 8, fontSize: 8, fontWeight: 600, letterSpacing: 2 }}>RAIO-X DO DINHEIRO</Text>
+            <Text style={{ marginLeft: 8, fontSize: 8, fontWeight: 600, letterSpacing: 2 }}>MEU MAPA FINANCEIRO</Text>
           </View>
           <Text style={{ fontSize: 8.5, color: "#A7ADA8" }}>{shortDate(d.createdAt)}</Text>
         </View>
@@ -355,12 +355,12 @@ function AttentionPage({ d }: { d: Diagnostic }) {
               <StatusChip status={a.severity} label={a.severity === "risk" ? "Risco" : "Atenção"} />
               <Text style={{ fontSize: 14, fontWeight: 600, marginTop: 6, letterSpacing: -0.2 }}>{a.title}</Text>
               <Text style={{ fontSize: 10.5, fontWeight: 600, marginTop: 2 }}>{a.figure}</Text>
-              <Text style={[s.body, { marginTop: 4 }]}>{a.text}</Text>
+              <Text style={[s.body, { marginTop: 4, color: "#3A423C" }]}>{a.analysis}</Text>
               <View style={{ flexDirection: "row", alignItems: "flex-start", backgroundColor: C.canvas, borderRadius: 10, padding: 9, marginTop: 8 }}>
                 <PdfIcon name="arrow" size={10} color={C.brandStrong} />
                 <Text style={{ marginLeft: 6, fontSize: 9.5, flex: 1 }}>
                   <Text style={{ fontWeight: 600, color: C.brandDeep }}>Primeiro passo: </Text>
-                  {FIRST_STEP[a.type]}
+                  {a.firstStep}
                 </Text>
               </View>
             </View>
@@ -389,7 +389,7 @@ function AttentionPage({ d }: { d: Diagnostic }) {
             ))}
           </View>
         </View>
-      ) : strengths.length ? (
+      ) : strengths.length && r.alerts.length < 3 ? (
         <View wrap={false} style={{ marginTop: 6 }}>
           <Text style={s.h2}>Seus pontos fortes</Text>
           <Text style={[s.body, { fontSize: 9, marginTop: 2 }]}>Indicadores que já estão em uma faixa saudável.</Text>
@@ -472,21 +472,67 @@ function ProjectionPage({ d }: { d: Diagnostic }) {
             <Text style={{ fontSize: 8.5, marginLeft: 5, color: C.muted }}>Com o ajuste sugerido</Text>
           </View>
         </View>
-        <View style={{ marginTop: 10 }}>
-          <ScenarioChart scenarios={scenarios} width={475} height={200} />
+        <View style={{ marginTop: 8 }}>
+          <ScenarioChart scenarios={scenarios} width={475} height={160} />
+        </View>
+        <View style={{ flexDirection: "row", alignItems: "center", marginTop: 6, backgroundColor: C.ink, borderRadius: 10, paddingVertical: 9, paddingHorizontal: 12 }}>
+          <Text style={{ fontSize: 8, color: "#A7ADA8", flex: 1 }}>
+            {deficit
+              ? "Em 12 meses, o ajuste diminui o buraco em"
+              : "Em 12 meses, o ajuste deixa a mais com você"}
+          </Text>
+          <Text style={{ fontSize: 15, fontWeight: 600, color: C.brand }}>{brl(twelve.adjusted - twelve.current)}</Text>
         </View>
       </View>
 
-      <View style={{ flexDirection: "row", alignItems: "center", marginTop: 12, backgroundColor: C.ink, borderRadius: 14, padding: 16 }}>
-        <View style={{ flex: 1 }}>
-          <Text style={{ fontSize: 8, color: "#A7ADA8" }}>Diferença entre os dois caminhos em 12 meses</Text>
-          <Text style={{ fontSize: 22, fontWeight: 600, color: C.brand, marginTop: 3 }}>{brl(twelve.adjusted - twelve.current)}</Text>
+      <View style={{ flexDirection: "row", marginTop: 12 }} wrap={false}>
+        <View style={[s.card, { width: 190, marginRight: 12 }]}>
+          <Text style={s.h2}>Score possível em 30 dias</Text>
+          <Text style={[s.body, { fontSize: 8, marginTop: 2 }]}>Com o ajuste feito e o valor liberado guardado.</Text>
+          {r.outlook.hint ? (
+            <Text style={{ fontSize: 9, lineHeight: 1.45, marginTop: 10, color: "#3A423C" }}>
+              {r.outlook.hint}
+            </Text>
+          ) : null}
+          {!r.outlook.hint ? (
+          <View style={{ flexDirection: "row", alignItems: "flex-end", marginTop: 12 }}>
+            <View>
+              <Text style={s.label}>Hoje</Text>
+              <Text style={{ fontSize: 26, fontWeight: 600, letterSpacing: -1 }}>{r.outlook.scoreNow}</Text>
+            </View>
+            <View style={{ marginHorizontal: 10, marginBottom: 8 }}>
+              <PdfIcon name="arrow" size={14} color={C.muted} />
+            </View>
+            <View>
+              <Text style={s.label}>Possível</Text>
+              <Text style={{ fontSize: 26, fontWeight: 600, letterSpacing: -1, color: C.brandStrong }}>{r.outlook.scoreAfter}</Text>
+            </View>
+          </View>
+          ) : null}
+          {!r.outlook.hint ? (
+            <View style={{ marginTop: 8 }}>
+              <StatusChip status={PROFILE_TONE[r.outlook.profileAfter]} label={PROFILE_LABEL[r.outlook.profileAfter]} />
+            </View>
+          ) : null}
         </View>
-        <Text style={{ width: 220, fontSize: 9, color: "#C9CEC9", lineHeight: 1.45 }}>
-          {deficit
-            ? "É o quanto o ajuste diminui o buraco ao longo de um ano, mês a mês."
-            : "É o quanto a mais pode ficar com você em um ano só com o ajuste sugerido."}
-        </Text>
+        <View style={[s.card, { flex: 1 }]}>
+          <Text style={s.h2}>O que mais move o seu mês</Text>
+          <Text style={[s.body, { fontSize: 8, marginTop: 2 }]}>Quanto cada mudança soma à sua sobra mensal.</Text>
+          <View style={{ marginTop: 6 }}>
+            {r.levers.map((l, i) => (
+              <View key={l.label} style={{ flexDirection: "row", alignItems: "center", paddingVertical: 5, borderTopWidth: i ? 1 : 0, borderTopColor: C.line }}>
+                <Text style={{ fontSize: 9, flex: 1 }}>{l.label}</Text>
+                <View style={{ alignItems: "flex-end" }}>
+                  <Text style={{ fontSize: 10.5, fontWeight: 600, color: C.brandStrong }}>+{brl(l.monthly)}</Text>
+                  <Text style={{ fontSize: 7, color: C.muted }}>sobra vai a {money(l.marginAfter)}</Text>
+                </View>
+              </View>
+            ))}
+            {r.levers.length === 0 ? (
+              <Text style={[s.body, { fontSize: 9 }]}>Seus gastos já estão enxutos: o próximo passo é aumentar a renda.</Text>
+            ) : null}
+          </View>
+        </View>
       </View>
 
       <Text style={{ fontSize: 7.5, color: C.muted, marginTop: 10, lineHeight: 1.4 }}>{PROJECTION_DISCLAIMER}</Text>
@@ -494,7 +540,107 @@ function ProjectionPage({ d }: { d: Diagnostic }) {
   );
 }
 
-/* ---------------- 7. Plano de 30 dias ---------------- */
+/* ---------------- 7. Sua rota ---------------- */
+
+function RouteRow({
+  kind,
+  index,
+  horizon,
+  title,
+  detail,
+  last,
+}: {
+  kind: "start" | "step" | "goal";
+  index?: number;
+  horizon: string;
+  title: string;
+  detail: string;
+  last: boolean;
+}) {
+  const marker =
+    kind === "start"
+      ? { bg: C.ink, fg: C.surface }
+      : kind === "goal"
+        ? { bg: C.brand, fg: C.ink }
+        : { bg: C.brandSoft, fg: C.brandDeep };
+  return (
+    <View style={{ flexDirection: "row" }} wrap={false}>
+      <View style={{ width: 34, alignItems: "center" }}>
+        <View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: marker.bg, alignItems: "center", justifyContent: "center" }}>
+          {kind === "start" ? (
+            <Dot color={C.brand} size={9} />
+          ) : kind === "goal" ? (
+            <PdfIcon name="check" size={12} color={C.ink} strokeWidth={3} />
+          ) : (
+            <Text style={{ fontSize: 10.5, fontWeight: 700, color: marker.fg }}>{index}</Text>
+          )}
+        </View>
+        {!last ? (
+          <View style={{ width: 0, flexGrow: 1, borderLeftWidth: 2, borderLeftColor: kind === "start" ? C.line : C.brand, borderStyle: "dashed", marginVertical: 3 }} />
+        ) : null}
+      </View>
+      <View
+        style={[
+          s.card,
+          {
+            flex: 1,
+            marginLeft: 8,
+            marginBottom: last ? 0 : 7,
+            paddingVertical: 8,
+            backgroundColor: kind === "goal" ? C.brandSoft : kind === "start" ? C.canvas : C.surface,
+            borderColor: kind === "goal" ? C.brand : C.line,
+          },
+        ]}
+      >
+        <Text style={[s.eyebrow, { color: kind === "start" ? C.muted : C.brandStrong }]}>{horizon}</Text>
+        <Text style={{ fontSize: 12, fontWeight: 600, marginTop: 3, letterSpacing: -0.2 }}>{title}</Text>
+        <Text style={[s.body, { fontSize: 9, marginTop: 1, lineHeight: 1.4 }]}>{detail}</Text>
+      </View>
+    </View>
+  );
+}
+
+function RoutePage({ d }: { d: Diagnostic }) {
+  const r = d.report;
+  const m = r.metrics;
+  return (
+    <Page size="A4" style={s.page}>
+      <PageChrome name={d.name} />
+      <SectionHeader
+        id="rota"
+        index="06"
+        title="Sua rota"
+        intro={`Do ponto em que você está até o seu objetivo: ${GOAL_LABEL[r.goal].toLowerCase()}. Cada etapa começa quando a anterior termina.`}
+      />
+      <RouteRow
+        kind="start"
+        horizon="Você está aqui"
+        title={`Score ${r.score} · ${m.monthlyMargin < 0 ? "faltam" : "sobram"} ${brl(Math.abs(m.monthlyMargin))} por mês`}
+        detail={`${PROFILE_LABEL[r.profile]} · ${pct(m.commitmentRate)} da renda já tem destino · reserva de ${brl(d.answers.reserve)}`}
+        last={false}
+      />
+      {r.route.map((step, i) => (
+        <RouteRow
+          key={step.key}
+          kind={i === r.route.length - 1 ? "goal" : "step"}
+          index={i + 1}
+          horizon={step.horizon}
+          title={step.title}
+          detail={step.detail}
+          last={i === r.route.length - 1}
+        />
+      ))}
+      <View wrap={false} style={{ flexDirection: "row", alignItems: "flex-start", marginTop: 10, backgroundColor: C.canvas, borderRadius: 12, padding: 10 }}>
+        <PdfIcon name="target" size={12} color={C.brandStrong} />
+        <Text style={{ marginLeft: 8, fontSize: 9, lineHeight: 1.5, flex: 1, color: "#3A423C" }}>
+          Os prazos são uma estimativa com o ritmo do plano, sem contar juros e rendimentos. Cada alavanca da página anterior que você usar encurta o caminho.
+        </Text>
+      </View>
+    </Page>
+  );
+}
+
+/* ---------------- 8. Plano de 30 dias ---------------- */
 
 function PlanPage({ d, reportUrl }: { d: Diagnostic; reportUrl: string }) {
   const r = d.report;
@@ -503,53 +649,64 @@ function PlanPage({ d, reportUrl }: { d: Diagnostic; reportUrl: string }) {
       <PageChrome name={d.name} />
       <SectionHeader
         id="plano"
-        index="06"
+        index="07"
         title={PLAN_TITLE[r.planFocus]}
-        intro="Uma tarefa por semana, pensada a partir das suas respostas. Marque cada uma quando concluir."
+        intro="Quatro semanas, cada uma com um objetivo, três tarefas com os seus números e uma meta para conferir. Marque o que for concluindo."
       />
-      {r.plan30d.map((w, i) => (
-        <View key={w.week} wrap={false} style={{ flexDirection: "row" }}>
-          <View style={{ width: 34, alignItems: "center" }}>
-            <View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: C.brandStrong, alignItems: "center", justifyContent: "center" }}>
-              <Text style={{ fontSize: 11, fontWeight: 700, color: C.surface }}>{w.week}</Text>
+      <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+        {r.plan30d.map((w, i) => (
+          <View
+            key={w.week}
+            wrap={false}
+            style={[s.card, { width: "48.8%", marginLeft: i % 2 ? "2.4%" : 0, marginBottom: 10, padding: 12 }]}
+          >
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <View style={{ width: 20, height: 20, borderRadius: 10, backgroundColor: C.brandStrong, alignItems: "center", justifyContent: "center" }}>
+                <Text style={{ fontSize: 9, fontWeight: 700, color: C.surface }}>{w.week}</Text>
+              </View>
+              <View style={{ marginLeft: 7 }}>
+                <Text style={[s.eyebrow, { fontSize: 6.5 }]}>Semana {w.week}</Text>
+                <Text style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: -0.2 }}>{w.title}</Text>
+              </View>
             </View>
-            {i < r.plan30d.length - 1 ? <View style={{ width: 2, flexGrow: 1, backgroundColor: C.brandSoft, marginVertical: 3 }} /> : null}
-          </View>
-          <View style={[s.card, { flex: 1, marginLeft: 8, marginBottom: 10, flexDirection: "row" }]}>
-            <View style={{ flex: 1 }}>
-              <Text style={s.eyebrow}>Semana {w.week}</Text>
-              <Text style={{ fontSize: 11.5, lineHeight: 1.45, marginTop: 4 }}>{w.text}</Text>
-              {w.detail ? (
-                <View style={{ backgroundColor: C.canvas, borderRadius: 8, paddingVertical: 6, paddingHorizontal: 8, marginTop: 7, alignSelf: "flex-start" }}>
-                  <Text style={{ fontSize: 9, fontWeight: 500 }}>{w.detail}</Text>
+            <Text style={[s.body, { fontSize: 8, marginTop: 6, lineHeight: 1.4 }]}>{w.goal}</Text>
+            <View style={{ marginTop: 6 }}>
+              {w.actions.map((action) => (
+                <View key={action} style={{ flexDirection: "row", alignItems: "flex-start", marginTop: 5 }}>
+                  <CheckSquare size={9} />
+                  <Text style={{ marginLeft: 5, fontSize: 8.4, lineHeight: 1.4, flex: 1 }}>{action}</Text>
                 </View>
-              ) : null}
+              ))}
             </View>
-            <View style={{ alignItems: "center", marginLeft: 12 }}>
-              <CheckSquare size={15} />
-              <Text style={{ fontSize: 6.5, color: C.muted, marginTop: 3 }}>Feito</Text>
+            <View style={{ marginTop: 8, backgroundColor: C.brandSoft, borderRadius: 8, paddingVertical: 6, paddingHorizontal: 8 }}>
+              <Text style={{ fontSize: 8.2, lineHeight: 1.4 }}>
+                <Text style={{ fontWeight: 600, color: C.brandDeep }}>Meta da semana: </Text>
+                {w.target}
+              </Text>
             </View>
           </View>
-        </View>
-      ))}
+        ))}
+      </View>
 
-      <View wrap={false} style={{ marginTop: 6, backgroundColor: C.ink, borderRadius: 14, padding: 18 }}>
-        <Text style={{ fontSize: 8, fontWeight: 600, letterSpacing: 1.6, color: C.brand }}>DAQUI A 30 DIAS</Text>
-        <Text style={{ fontSize: 13, fontWeight: 600, color: C.surface, marginTop: 6 }}>
-          Refaça seu Raio-X e compare com o score de hoje: {r.score}.
-        </Text>
-        <Text style={{ fontSize: 9, color: "#C9CEC9", marginTop: 4, lineHeight: 1.45 }}>
-          Seu relatório também fica disponível online, com os mesmos números deste PDF.
-        </Text>
-        <Link src={reportUrl} style={{ marginTop: 10, textDecoration: "none" }}>
-          <View style={{ flexDirection: "row", alignItems: "center", alignSelf: "flex-start", backgroundColor: C.brandStrong, borderRadius: 10, paddingVertical: 7, paddingHorizontal: 11 }}>
-            <Text style={{ fontSize: 9, fontWeight: 600, color: C.surface, marginRight: 5 }}>Abrir meu relatório online</Text>
+      <View wrap={false} style={{ marginTop: 4, flexDirection: "row", alignItems: "center", backgroundColor: C.ink, borderRadius: 14, padding: 16 }}>
+        <View style={{ flex: 1 }}>
+          <Text style={{ fontSize: 7.5, fontWeight: 600, letterSpacing: 1.6, color: C.brand }}>DAQUI A 30 DIAS</Text>
+          <Text style={{ fontSize: 11.5, fontWeight: 600, color: C.surface, marginTop: 5 }}>
+            Refaça seu Mapa e compare com o score de hoje: {r.score}.
+          </Text>
+          <Text style={{ fontSize: 8.5, color: "#C9CEC9", marginTop: 3 }}>
+            Meta possível com o plano: {r.outlook.scoreAfter}.
+          </Text>
+        </View>
+        <Link src={reportUrl} style={{ textDecoration: "none" }}>
+          <View style={{ flexDirection: "row", alignItems: "center", backgroundColor: C.brandStrong, borderRadius: 10, paddingVertical: 7, paddingHorizontal: 11 }}>
+            <Text style={{ fontSize: 8.5, fontWeight: 600, color: C.surface, marginRight: 5 }}>Abrir meu relatório online</Text>
             <PdfIcon name="link" size={9} color={C.surface} />
           </View>
         </Link>
       </View>
 
-      <Text style={{ fontSize: 7, color: C.muted, marginTop: 14, lineHeight: 1.45 }}>{DISCLAIMER}</Text>
+      <Text style={{ fontSize: 6.8, color: C.muted, marginTop: 10, lineHeight: 1.45 }}>{DISCLAIMER}</Text>
     </Page>
   );
 }
@@ -557,8 +714,8 @@ function PlanPage({ d, reportUrl }: { d: Diagnostic; reportUrl: string }) {
 export function ReportDocument({ diagnostic, reportUrl }: { diagnostic: Diagnostic; reportUrl: string }) {
   return (
     <Document
-      title={`Raio-X do Dinheiro — ${diagnostic.name}`}
-      author="Raio-X do Dinheiro"
+      title={`Meu Mapa Financeiro — ${diagnostic.name}`}
+      author="Meu Mapa Financeiro"
       subject="Diagnóstico financeiro personalizado"
       language="pt-BR"
     >
@@ -568,6 +725,7 @@ export function ReportDocument({ diagnostic, reportUrl }: { diagnostic: Diagnost
       <IndicatorsPage d={diagnostic} />
       <AttentionPage d={diagnostic} />
       <ProjectionPage d={diagnostic} />
+      <RoutePage d={diagnostic} />
       <PlanPage d={diagnostic} reportUrl={reportUrl} />
     </Document>
   );

@@ -3,7 +3,7 @@
  * com estado, distribuição da renda e cenários de projeção. Tudo sai das
  * mesmas regras do motor financeiro; nada de fórmula nova nos componentes.
  */
-import type { AlertType, Answers, Report, ScoreBreakdown } from "@/types/diagnostic";
+import type { Answers, Report, ScoreBreakdown } from "@/types/diagnostic";
 import {
   scoreCommitment,
   scoreDebt,
@@ -217,17 +217,6 @@ export function projectionScenarios(report: Report): Scenario[] {
     adjusted: withAdjustment * months,
   }));
 }
-
-/** Primeiro passo prático para cada ponto de atenção. */
-export const FIRST_STEP: Record<AlertType, string> = {
-  DEFICIT: "Corte primeiro o que não é essencial até as contas fecharem no zero.",
-  DEBT: "Liste as dívidas por valor e prioridade e evite assumir novas parcelas.",
-  HIGH_COMMITMENT: "Revise os compromissos fixos: o que dá para renegociar ou cancelar?",
-  INSTALLMENTS: "Deixe as parcelas atuais terminarem antes de assumir novas.",
-  HIGH_VARIABLE: "Defina um teto mensal para delivery, lazer e compras pessoais.",
-  LOW_SAVING: "Separe um valor fixo assim que o salário cair, antes de gastar.",
-  LOW_RESERVE: "Direcione parte da sobra para uma conta só de imprevistos.",
-};
 
 /** Resumo em uma frase com os números da pessoa. */
 export function summarySentence(report: Report): string {

@@ -78,14 +78,6 @@ function Phone() {
           </span>
         </div>
 
-        {/* Linha do raio-x */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 animate-scan motion-reduce:hidden"
-        >
-          <div className="absolute inset-x-0 bottom-0 h-24 bg-linear-to-b from-transparent to-brand/15" />
-          <div className="absolute inset-x-0 bottom-0 h-0.5 bg-brand shadow-[0_0_14px_2px_rgba(34,197,94,0.7)]" />
-        </div>
       </div>
     </div>
   );
@@ -101,14 +93,21 @@ function FloatCard({ className, children }: { className: string; children: React
   );
 }
 
+/** "Em cerca de 7 meses" → "Em ~7 meses"; destino vira só "Destino". */
+function shortHorizon(horizon: string): string {
+  if (horizon.startsWith("Seu destino")) return "Destino";
+  if (horizon === "Próximos 30 dias") return "Agora · 30 dias";
+  return horizon.replace("Em cerca de ", "Em ~");
+}
+
+const routePreview = [report.route[0], report.route[1], report.route[report.route.length - 1]];
+
 export function HeroMockup() {
-  const p = report.projection;
-  const bars = [p.threeMonths, p.sixMonths, p.twelveMonths];
   return (
     <div
       role="img"
       aria-label={`Exemplo de resultado: score ${report.score} de 100, perfil ${PROFILE_LABEL[report.profile]}, renda comprometida de ${pct(m.commitmentRate)}`}
-      className="relative isolate mx-auto w-full max-w-[420px] pt-20 pb-24 sm:py-8"
+      className="relative isolate mx-auto w-full max-w-[420px] pt-20 pb-36 sm:py-8"
     >
       <div aria-hidden="true">
         <div className="absolute inset-x-10 top-24 bottom-24 -z-10 rounded-full bg-brand/25 blur-3xl" />
@@ -126,29 +125,37 @@ export function HeroMockup() {
           </div>
         </FloatCard>
 
-        <FloatCard className="right-0 bottom-0 w-[160px] animate-float [animation-delay:-3.5s] motion-reduce:animate-none sm:-right-14 sm:bottom-28 sm:w-[170px] lg:-right-20">
-          <p className="text-[11px] leading-tight text-muted">Projeção em 12 meses</p>
-          <p className="text-xl font-semibold tracking-tight">{brl(p.twelveMonths)}</p>
-          <div className="mt-2 flex h-10 items-end gap-1.5">
-            {bars.map((v, i) => (
-              <span
-                key={i}
-                className="w-5 rounded-t-[4px] bg-brand"
-                style={{ height: `${(v / p.twelveMonths) * 100}%`, opacity: 0.45 + i * 0.27 }}
-              />
+        <FloatCard className="right-0 bottom-0 w-[176px] animate-float [animation-delay:-3.5s] motion-reduce:animate-none sm:-right-14 sm:bottom-24 sm:w-[184px] lg:-right-24">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-brand-strong">Sua rota</p>
+          <ol className="mt-2">
+            {routePreview.map((step, i) => (
+              <li key={step.key} className="relative flex gap-2 pb-2.5 last:pb-0">
+                {i < routePreview.length - 1 ? (
+                  <span className="absolute top-3.5 bottom-0 left-[5px] border-l-2 border-dashed border-brand/50" />
+                ) : null}
+                <span
+                  className={`relative mt-0.5 size-3 shrink-0 rounded-full ${
+                    i === routePreview.length - 1 ? "bg-brand" : i === 0 ? "bg-ink" : "border-2 border-brand bg-surface"
+                  }`}
+                />
+                <span className="text-[11px] leading-tight">
+                  <span className="block text-muted">{shortHorizon(step.horizon)}</span>
+                  <span className="font-semibold">{step.title}</span>
+                </span>
+              </li>
             ))}
-          </div>
+          </ol>
         </FloatCard>
 
-        <FloatCard className="bottom-4 -left-28 hidden w-[200px] lg:block">
+        <FloatCard className="bottom-4 -left-28 hidden w-[210px] lg:block">
           <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-brand-strong">
-            Plano de 30 dias
+            Semana 1 · {report.plan30d[0].title}
           </p>
           <p className="mt-1.5 flex items-start gap-1.5 text-[12px] leading-snug">
             <span className="mt-0.5 grid size-4 shrink-0 place-items-center rounded-full bg-brand-strong text-white">
               <Icon name="check" className="size-2.5" strokeWidth={3.5} />
             </span>
-            Semana 1: revisar compromissos fixos
+            {report.plan30d[0].target}
           </p>
         </FloatCard>
       </div>

@@ -73,6 +73,10 @@ export interface Alert {
   title: string;
   figure: string;
   text: string;
+  /** Leitura com os números da pessoa: distância da referência e impacto em reais. */
+  analysis: string;
+  /** Primeira ação prática. */
+  firstStep: string;
 }
 
 export interface Adjustment {
@@ -89,12 +93,52 @@ export interface Projection {
 
 export interface PlanWeek {
   week: number;
-  text: string;
-  detail?: string;
+  title: string;
+  /** Objetivo da semana (texto-base do briefing, seções 36 a 39). */
+  goal: string;
+  /** Ações concretas, com os valores da pessoa. */
+  actions: string[];
+  /** Meta mensurável para conferir no fim da semana. */
+  target: string;
+}
+
+/** Valores de referência calculados para o plano e a rota. */
+export interface Targets {
+  /** Dinheiro que fica livre por mês depois do ajuste sugerido (nunca negativo). */
+  freeAfterPlan: number;
+  weeklyVariableCap: number;
+  monthlyVariableCap: number;
+  suggestedSaving: number;
+  /** Base da reserva: gastos essenciais do mês (moradia + essenciais). */
+  reserveBase: number;
+  reserveTarget: number;
+  reserveIdeal: number;
+  debtPayoffMonths: number | null;
+}
+
+export interface Milestone {
+  key: string;
+  horizon: string;
+  title: string;
+  detail: string;
+}
+
+export interface Lever {
+  label: string;
+  monthly: number;
+  marginAfter: number;
+}
+
+export interface Outlook {
+  scoreNow: number;
+  scoreAfter: number;
+  profileAfter: Profile;
+  /** Quando o plano sozinho não muda o score: o que falta para subir de faixa. */
+  hint: string | null;
 }
 
 export interface Report {
-  version: 1;
+  version: 2;
   score: number;
   profile: Profile;
   scoreBreakdown: ScoreBreakdown;
@@ -105,6 +149,10 @@ export interface Report {
   projection: Projection;
   planFocus: PlanFocus;
   plan30d: PlanWeek[];
+  targets: Targets;
+  route: Milestone[];
+  levers: Lever[];
+  outlook: Outlook;
   goal: Goal;
 }
 

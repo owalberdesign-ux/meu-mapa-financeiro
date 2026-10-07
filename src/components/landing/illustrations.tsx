@@ -3,6 +3,7 @@ import { ScoreCard } from "@/components/ScoreCard";
 import { LogoMark, Meter, StatusBadge } from "@/components/ui";
 import { brl, pct } from "@/lib/format";
 import { PROFILE_LABEL, PROFILE_TONE } from "@/lib/report-builder";
+import { scorePillars } from "@/lib/report-insights";
 import { SAMPLE_ANSWERS, SAMPLE_DIAGNOSTIC } from "@/lib/sample";
 import type { Profile } from "@/types/diagnostic";
 
@@ -105,12 +106,10 @@ export function StepDiscover() {
   );
 }
 
-const PLAN_PREVIEW = ["Revisar compromissos fixos", "Sem novos pagamentos", "Reduzir não essenciais", "Definir um limite"];
-
 export function StepOrganize() {
   return (
     <ul className="space-y-2 rounded-2xl bg-canvas p-4 text-[13px]">
-      {PLAN_PREVIEW.map((t, i) => (
+      {report.plan30d.map((w) => w.title).map((t, i) => (
         <li key={t} className="flex items-center gap-2.5">
           <span
             className={`grid size-5 shrink-0 place-items-center rounded-full ${
@@ -159,6 +158,26 @@ export function TileScore() {
           );
         })}
       </ul>
+      <div className="mt-6 hidden lg:block">
+        <p className="text-[13px] font-semibold">De onde vêm seus pontos</p>
+        <ul className="mt-3 space-y-2.5">
+          {scorePillars(report).map((p) => (
+            <li key={p.key} className="grid grid-cols-[96px_1fr_auto] items-center gap-3 text-[12.5px]">
+              <span className="text-muted">{p.label}</span>
+              <span className="h-2 overflow-hidden rounded-[3px] bg-track">
+                <span
+                  className="block h-full rounded-r-[3px] bg-brand"
+                  style={{ width: `${(p.points / p.max) * 100}%`, opacity: p.points / p.max >= 0.7 ? 1 : 0.55 }}
+                />
+              </span>
+              <span className="tabular-nums">
+                <span className="font-semibold">{p.points}</span>
+                <span className="text-muted">/{p.max}</span>
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
     </>
   );
 }
@@ -179,59 +198,102 @@ export function TileAlerts() {
   );
 }
 
-export function TileProjection() {
-  const p = report.projection;
-  const cols = [
-    ["3 meses", p.threeMonths],
-    ["6 meses", p.sixMonths],
-    ["12 meses", p.twelveMonths],
-  ] as const;
+export function TileRoute() {
   return (
-    <div className="flex h-44 items-end justify-around gap-3">
-      {cols.map(([label, value]) => (
-        <div key={label} className="flex h-full flex-col items-center justify-end">
-          <span className="text-[13px] font-semibold tabular-nums">{brl(value)}</span>
-          <span
-            className="mt-1.5 w-6 rounded-t-[4px] bg-brand"
-            style={{ height: `${(value / p.twelveMonths) * 62}%` }}
-          />
-          <span className="mt-2 text-[12px] text-muted">{label}</span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-export function TilePlan() {
-  return (
-    <ol className="space-y-2">
-      {report.plan30d.map((w) => (
-        <li key={w.week} className="flex gap-3 rounded-2xl bg-canvas p-3">
-          <span className="text-[12px] font-semibold tabular-nums text-brand-strong">S{w.week}</span>
-          <span className="line-clamp-2 text-[13px] leading-snug">{w.text}</span>
-        </li>
-      ))}
+    <ol>
+      {report.route.map((step, i) => {
+        const last = i === report.route.length - 1;
+        return (
+          <li key={step.key} className="relative flex gap-3 pb-3.5 last:pb-0">
+            {!last ? <span className="absolute top-5 bottom-0 left-[9px] border-l-2 border-dashed border-brand/50" /> : null}
+            <span
+              className={`relative grid size-5 shrink-0 place-items-center rounded-full text-[10px] font-bold ${
+                last ? "bg-brand text-ink" : "bg-brand-soft text-brand-deep"
+              }`}
+            >
+              {last ? <Icon name="check" className="size-3" strokeWidth={3.5} /> : i + 1}
+            </span>
+            <span className="text-[13px] leading-snug">
+              <span className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-brand-strong">
+                {step.horizon.replace("Seu destino · ", "Destino · ")}
+              </span>
+              <span className="font-semibold">{step.title}</span>
+            </span>
+          </li>
+        );
+      })}
     </ol>
   );
 }
 
-export function TilePdf() {
+export function TilePlan() {
+  const week = report.plan30d[0];
   return (
-    <div className="relative mx-auto h-44 w-32 rotate-[-4deg] rounded-lg border border-line bg-surface p-3 shadow-[0_18px_40px_-20px_rgba(20,23,20,0.45)]">
-      <LogoMark className="size-5" />
-      <p className="mt-3 text-[7px] text-muted">Diagnóstico de</p>
-      <p className="text-[10px] font-semibold">Mariana Souza</p>
-      <p className="mt-2 text-2xl font-semibold leading-none tracking-tighter">
-        {report.score}
-        <span className="text-[9px] font-medium text-muted"> / 100</span>
+    <div className="rounded-2xl bg-canvas p-4">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-brand-strong">Semana 1</p>
+      <p className="text-[15px] font-semibold">{week.title}</p>
+      <ul className="mt-2.5 space-y-2">
+        {week.actions.map((action, i) => (
+          <li key={action} className="flex gap-2 text-[12.5px] leading-snug">
+            <span
+              className={`mt-0.5 grid size-4 shrink-0 place-items-center rounded ${
+                i === 0 ? "bg-brand-strong text-white" : "border-2 border-line bg-surface"
+              }`}
+            >
+              {i === 0 ? <Icon name="check" className="size-2.5" strokeWidth={3.5} /> : null}
+            </span>
+            <span className="line-clamp-2">{action}</span>
+          </li>
+        ))}
+      </ul>
+      <p className="mt-3 rounded-lg bg-brand-soft/70 px-2.5 py-2 text-[12px]">
+        <span className="font-semibold text-brand-deep">Meta: </span>
+        {week.target}
       </p>
-      <div className="mt-3 space-y-1.5">
-        <span className="block h-1 w-full rounded bg-track" />
-        <span className="block h-1 w-4/5 rounded bg-track" />
-        <span className="block h-1 w-3/5 rounded bg-track" />
+    </div>
+  );
+}
+
+/** Capa do PDF atual (escura, com o medidor) sobre uma página interna. */
+export function TilePdf() {
+  const r = 34;
+  const f = report.score / 100;
+  const a = Math.PI * (1 - f);
+  const end = { x: 45 + r * Math.cos(a), y: 44 - r * Math.sin(a) };
+  return (
+    <div className="relative mx-auto h-48 w-40">
+      <div className="absolute top-3 left-9 h-44 w-32 rotate-[6deg] rounded-lg border border-line bg-surface p-3 shadow-[0_18px_40px_-24px_rgba(20,23,20,0.45)]">
+        <p className="text-[6px] font-semibold uppercase tracking-[0.14em] text-brand-strong">06 · Sua rota</p>
+        <div className="mt-2 space-y-2">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className="flex items-center gap-1.5">
+              <span className={`size-2 rounded-full ${i === 3 ? "bg-brand" : "bg-brand-soft"}`} />
+              <span className="h-1 flex-1 rounded bg-track" />
+            </div>
+          ))}
+        </div>
       </div>
-      <span className="absolute -right-3 -bottom-3 rounded-lg bg-ink px-2 py-1 text-[10px] font-bold text-white">
-        PDF
+      <div className="absolute top-0 left-0 h-44 w-32 rotate-[-5deg] overflow-hidden rounded-lg bg-ink p-3 text-white shadow-[0_22px_44px_-18px_rgba(20,23,20,0.6)]">
+        <div className="absolute inset-0 bg-grid-light opacity-70" />
+        <div className="relative">
+          <div className="flex items-center gap-1">
+            <LogoMark className="size-3.5" />
+            <span className="text-[5.5px] font-semibold uppercase tracking-[0.16em]">Meu Mapa Financeiro</span>
+          </div>
+          <p className="mt-3 text-[6px] text-white/60">Diagnóstico financeiro de</p>
+          <p className="text-[11px] font-semibold leading-tight">Mariana Souza</p>
+          <svg viewBox="0 0 90 50" className="mx-auto mt-2 w-[84px]" aria-hidden="true">
+            <path d="M 11 44 A 34 34 0 0 1 79 44" fill="none" stroke="#2A302B" strokeWidth="8" strokeLinecap="round" />
+            <path d={`M 11 44 A 34 34 0 0 1 ${end.x.toFixed(1)} ${end.y.toFixed(1)}`} fill="none" stroke="#f59e0b" strokeWidth="8" strokeLinecap="round" />
+            <text x="45" y="43" textAnchor="middle" fill="#ffffff" fontSize="17" fontWeight="600">{report.score}</text>
+          </svg>
+          <p className="mx-auto mt-1 w-fit rounded-full bg-warn px-1.5 py-0.5 text-[5.5px] font-bold uppercase text-ink">
+            No limite
+          </p>
+        </div>
+      </div>
+      <span className="absolute -right-1 -bottom-1 rounded-lg bg-brand-strong px-2 py-1 text-[10px] font-bold text-white">
+        PDF · 8 páginas
       </span>
     </div>
   );

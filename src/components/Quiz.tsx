@@ -267,7 +267,7 @@ function QuizFlow({ saved }: { saved: Saved | null }) {
       <div className="grid min-h-dvh place-items-center px-6" role="status" aria-live="polite">
         <div className="text-center">
           <span className="mx-auto block size-12 animate-spin rounded-full border-4 border-brand-soft border-t-brand-strong motion-reduce:animate-none" />
-          <p className="mt-6 text-xl font-semibold">Calculando seu Raio-X…</p>
+          <p className="mt-6 text-xl font-semibold">Montando seu Mapa Financeiro…</p>
           <p className="mt-2 text-muted">Cruzando renda, despesas, parcelas e reserva.</p>
         </div>
       </div>
@@ -282,7 +282,7 @@ function QuizFlow({ saved }: { saved: Saved | null }) {
           <h1 className="mt-3 text-[1.75rem] font-semibold leading-tight tracking-tight sm:text-3xl">
             Seu diagnóstico está quase pronto.
           </h1>
-          <p className="mt-2 text-lg text-muted">Para identificar e enviar seu Raio-X, informe:</p>
+          <p className="mt-2 text-lg text-muted">Para identificar e enviar o seu Mapa, informe:</p>
 
           <label className="mt-8 block text-sm font-medium" htmlFor="name">
             Nome
@@ -309,7 +309,7 @@ function QuizFlow({ saved }: { saved: Saved | null }) {
             onChange={(e) => setEmail(e.target.value)}
             className="mt-2 h-14 w-full rounded-2xl border border-line bg-surface px-4 text-lg outline-none transition focus:border-brand-strong focus:ring-4 focus:ring-brand-soft"
           />
-          <p className="mt-3 text-sm text-muted">Usamos seu e-mail só para enviar o seu Raio-X.</p>
+          <p className="mt-3 text-sm text-muted">Usamos seu e-mail só para enviar o seu Mapa.</p>
 
           <ErrorText message={error} />
 

@@ -57,13 +57,16 @@ export function LogoMark({ size = 22 }: { size?: number }) {
     <Svg width={size} height={size} viewBox="0 0 32 32">
       <Rect width={32} height={32} rx={9} fill={C.ink} />
       <Path
-        d="M6.5 17h4.5l2.5-6 4.5 11 2.5-5h5"
+        d="M8.5 23.5c4.5 0 3.5-8 8-8s3.5-6 7-6"
         fill="none"
         stroke={C.brand}
-        strokeWidth={2.4}
+        strokeWidth={2.2}
         strokeLinecap="round"
-        strokeLinejoin="round"
+        strokeDasharray="0.1 4.2"
       />
+      <Circle cx={8.5} cy={23.5} r={2.2} fill={C.surface} />
+      <Circle cx={23.5} cy={9.5} r={3.4} fill={C.brand} />
+      <Circle cx={23.5} cy={9.5} r={1.3} fill={C.ink} />
     </Svg>
   );
 }
@@ -121,7 +124,7 @@ export function PageChrome({ name }: { name: string }) {
         <View style={{ flexDirection: "row", alignItems: "center" }}>
           <LogoMark size={16} />
           <Text style={{ marginLeft: 6, fontSize: 8.5, fontWeight: 600 }}>
-            Raio-X <Text style={{ fontWeight: 400, color: C.muted }}>do Dinheiro</Text>
+            Meu Mapa <Text style={{ fontWeight: 400, color: C.muted }}>Financeiro</Text>
           </Text>
         </View>
         <Text style={{ fontSize: 8, color: C.muted }}>Diagnóstico de {name}</Text>
@@ -177,7 +180,7 @@ export function SectionHeader({
         >
           <Text style={{ fontSize: 8, fontWeight: 700, color: C.brandDeep }}>{index}</Text>
         </View>
-        <Text style={[s.eyebrow, { color: C.muted }]}>Parte {Number(index)} de 6</Text>
+        <Text style={[s.eyebrow, { color: C.muted }]}>Parte {Number(index)} de 7</Text>
       </View>
       <Text style={[s.h1, { marginTop: 8 }]}>{title}</Text>
       {intro ? <Text style={[s.body, { marginTop: 6, fontSize: 10.5 }]}>{intro}</Text> : null}
