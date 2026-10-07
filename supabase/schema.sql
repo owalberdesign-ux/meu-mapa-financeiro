@@ -1,4 +1,4 @@
--- Raio-X do Dinheiro: tabela única do MVP (briefing, seção 29).
+-- Meu Mapa Financeiro: tabela única do MVP (briefing, seção 29).
 -- Acesso só pelo servidor (rotas /api com a service role); o navegador nunca
 -- lê esta tabela direto, então nenhuma política pública é criada.
 
