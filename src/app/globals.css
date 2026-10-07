@@ -1,26 +1,64 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@theme {
+  --color-canvas: #f6f7f5;
+  --color-surface: #ffffff;
+  --color-ink: #141714;
+  --color-muted: #667067;
+  --color-line: #e4e8e4;
+  --color-track: #eef1ee;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  /* Verde: ação e dinheiro. O tom forte é o que leva texto branco. */
+  --color-brand: #22c55e;
+  --color-brand-strong: #15803d;
+  --color-brand-deep: #166534;
+  --color-brand-soft: #dcfce7;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  /* Estados: âmbar = atenção, vermelho = risco real. */
+  --color-warn: #f59e0b;
+  --color-warn-strong: #b45309;
+  --color-warn-soft: #fef3c7;
+  --color-risk: #ef4444;
+  --color-risk-strong: #b91c1c;
+  --color-risk-soft: #fee2e2;
+
+  --animate-rise: rise 0.35s ease-out both;
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
   }
 }
 
+@theme inline {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+:root {
+  color-scheme: light;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  -webkit-tap-highlight-color: transparent;
+}
+
+@page {
+  size: A4;
+  margin: 14mm;
+}
+
+@media print {
+  body {
+    background: #fff;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
 }

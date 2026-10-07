@@ -1,36 +1,52 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Raio-X do Dinheiro
 
-## Getting Started
+Diagnóstico financeiro personalizado de R$37: a pessoa responde um quiz curto, vê o score e o
+pré-diagnóstico de graça e desbloqueia o relatório completo (com PDF) pelo checkout da Kiwify.
 
-First, run the development server:
+Especificação completa: [`docs/briefing.md`](docs/briefing.md).
+
+## Rodar
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev        # http://localhost:3000
+npm test           # testes do motor financeiro
+npm run build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Rotas
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Rota | O que é |
+|---|---|
+| `/` | Landing |
+| `/diagnostico` | Quiz (10 perguntas, 1 condicional) + nome/e-mail |
+| `/resultado/[id]` | Pré-diagnóstico com conteúdo bloqueado, ou relatório completo se pago |
+| `/exemplo` | Relatório pago completo com dados fictícios (para revisão; não indexado) |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Onde está cada coisa
 
-## Learn More
+| Arquivo | Responsabilidade |
+|---|---|
+| `src/lib/financial-engine.ts` | Métricas, score, limites, perfil, problema principal, alertas, projeção |
+| `src/lib/report-builder.ts` | Textos dos alertas, plano de 30 dias e montagem do relatório (`report_data`) |
+| `src/lib/checkout.ts` | `buildCheckoutUrl` — único lugar com a URL da Kiwify (`s1` = ID do diagnóstico) |
+| `src/lib/diagnostic-store.ts` | Onde o diagnóstico fica salvo (hoje no navegador; fase 2: Supabase) |
+| `src/lib/analytics.ts` | Eventos do funil (`view_landing` … `download_pdf`) no `dataLayer`, prontos para Pixel/GA |
+| `src/components/report.tsx` | Pré-diagnóstico, bloqueio, relatório completo; o PDF é o relatório impresso (A4) |
+| `supabase/schema.sql` | Tabela `diagnostics` da fase 2 |
 
-To learn more about Next.js, take a look at the following resources:
+## Estado atual (primeira entrega)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Tudo calculado no navegador; o diagnóstico fica salvo no aparelho da pessoa.
+- Sem `NEXT_PUBLIC_KIWIFY_CHECKOUT_URL`, o botão de compra **simula o pagamento** (modo prévia) para
+  mostrar a entrega. Com a variável preenchida, o botão leva ao checkout com `name`, `email` e `s1`.
+- PDF: botão "Baixar meu Raio-X em PDF" abre a impressão do navegador com layout A4 de 6 páginas.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Próxima etapa
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Supabase: criar a tabela com `supabase/schema.sql`; trocar `diagnostic-store.ts` por chamadas a
+   rotas `/api/diagnostics` (servidor com a service role), mantendo as mesmas funções.
+2. Kiwify: preencher `NEXT_PUBLIC_KIWIFY_CHECKOUT_URL`; criar `/api/webhooks/kiwify` que valida o
+   token, lê `s1` e marca o diagnóstico como pago; apontar o pós-compra para `/resultado/[id]`.
+3. Tela de "pagamento ainda não confirmado" enquanto o webhook não chega.
+4. E-mail com o link do relatório (backup da entrega na tela).
