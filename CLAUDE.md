@@ -26,6 +26,7 @@ score possível (tudo em `src/lib/report-builder.ts`, com testes).
 - Pagamento confirmado só pelo webhook da Kiwify (`/api/webhooks/kiwify`, assinatura conferida). A simulação existe só enquanto o checkout não está configurado.
 - Segredos (secret key do Supabase, token da Kiwify, token da API de Conversões do Meta) ficam só nas variáveis da Vercel.
 - Compra no Meta: Pixel no navegador + API de Conversões no webhook, sempre com `event_id` = ID do diagnóstico (deduplicação). Pixel só no site, nunca também na Kiwify.
+- `/privacidade` descreve o que o site coleta de verdade. Mudou a coleta, um fornecedor ou o que vai para o Meta (ou ligou o GA)? Atualize o texto e a data em `PRIVACY` (`src/lib/legal.ts`) no mesmo commit.
 
 ## Visual de mapa
 

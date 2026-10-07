@@ -40,7 +40,7 @@ export function StickyCta() {
         tabIndex={visible ? 0 : -1}
         className="flex h-13 items-center justify-center gap-2 rounded-2xl bg-brand-strong text-[15px] font-semibold uppercase tracking-wide text-white"
       >
-        Fazer meu Mapa
+        Começar grátis
         <span className="font-normal normal-case tracking-normal text-white/75">· 3 min</span>
         <Icon name="arrowRight" className="size-5" />
       </Link>

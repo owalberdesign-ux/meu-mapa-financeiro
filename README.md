@@ -25,6 +25,7 @@ npm run build
 | `/resultado/[id]` | Pré-diagnóstico com conteúdo bloqueado, espera do pagamento ou relatório completo |
 | `/obrigado` | Página de obrigado da Kiwify: leva a pessoa de volta ao Mapa dela |
 | `/exemplo` | Relatório pago completo com dados fictícios (para revisão; não indexado) |
+| `/privacidade` | Política de Privacidade (LGPD); responsável e contato em `PRIVACY`, `src/lib/legal.ts` |
 | `POST /api/diagnostics` | Cria o diagnóstico (relatório calculado no servidor) |
 | `GET /api/diagnostics/[id]` | Pré-diagnóstico; o relatório completo só sai depois do pagamento |
 | `POST /api/diagnostics/[id]/simulate` | Só no modo prévia (sem checkout): simula a compra |

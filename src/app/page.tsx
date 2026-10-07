@@ -21,7 +21,7 @@ import { Logo, buttonClass, buttonFullClass } from "@/components/ui";
 import { DISCLAIMER } from "@/lib/legal";
 
 const HERO_BENEFITS = [
-  "Score financeiro de 0 a 100",
+  "Score de 0 a 100",
   "Pontos de atenção com o primeiro passo",
   "Rota com prazos até o seu objetivo",
   "Plano de 30 dias com metas semanais",
@@ -179,7 +179,7 @@ export default function LandingPage() {
           href="/diagnostico"
           className="rounded-xl px-3 py-2 text-sm font-semibold whitespace-nowrap text-brand-strong hover:bg-brand-soft max-[399px]:hidden"
         >
-          Fazer meu Mapa
+          Começar grátis
         </Link>
       </header>
 
@@ -197,7 +197,7 @@ export default function LandingPage() {
                   <span className="absolute inline-flex size-full animate-ping rounded-full bg-brand opacity-60 motion-reduce:animate-none" />
                   <span className="relative inline-flex size-2 rounded-full bg-brand" />
                 </span>
-                Diagnóstico financeiro personalizado
+                Comece grátis · resultado em 3 minutos
               </p>
               <h1 className="mt-5 text-[2.6rem] font-semibold leading-[1.02] tracking-[-0.035em] text-balance sm:text-[4rem]">
                 Seu salário{" "}
@@ -214,19 +214,27 @@ export default function LandingPage() {
                 <IncomeStart />
                 <p className="mt-3 flex items-center gap-2 px-1 text-sm text-muted">
                   <Icon name="shield" className="size-4 shrink-0 text-brand-strong" />
-                  Leva cerca de 3 minutos. Sem conectar sua conta bancária.
+                  Sem conectar sua conta bancária e sem criar conta.
                 </p>
               </div>
               <ul className="mt-6 grid gap-2 text-[15px] sm:grid-cols-2 sm:gap-x-6">
-                {HERO_BENEFITS.map((b) => (
+                {HERO_BENEFITS.map((b, i) => (
                   <li key={b} className="flex items-center gap-2.5">
                     <span className="grid size-5 shrink-0 place-items-center rounded-full bg-brand-strong text-white">
                       <Icon name="check" className="size-3" strokeWidth={3.5} />
                     </span>
                     {b}
+                    {i === 0 ? (
+                      <span className="shrink-0 rounded-full bg-brand-soft px-2 py-0.5 text-[12px] font-semibold uppercase tracking-wide text-brand-strong">
+                        Grátis
+                      </span>
+                    ) : null}
                   </li>
                 ))}
               </ul>
+              <p className="mt-4 text-[13px] text-muted">
+                Score e resumo grátis. O Mapa completo custa R$ 37, pagamento único.
+              </p>
             </div>
             <MapScene />
           </div>
@@ -448,7 +456,12 @@ export default function LandingPage() {
         <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
           <Logo />
           <p className="mt-5 max-w-3xl text-[13px] leading-relaxed text-muted">{DISCLAIMER}</p>
-          <p className="mt-4 text-[13px] text-muted">© 2026 Meu Mapa Financeiro</p>
+          <p className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-[13px] text-muted">
+            <span>© 2026 Meu Mapa Financeiro</span>
+            <Link href="/privacidade" className="underline underline-offset-2 hover:text-ink">
+              Política de Privacidade
+            </Link>
+          </p>
         </div>
       </footer>
     </>

@@ -309,7 +309,13 @@ function QuizFlow({ saved }: { saved: Saved | null }) {
             onChange={(e) => setEmail(e.target.value)}
             className="mt-2 h-14 w-full rounded-2xl border border-line bg-surface px-4 text-lg outline-none transition focus:border-brand-strong focus:ring-4 focus:ring-brand-soft"
           />
-          <p className="mt-3 text-sm text-muted">Usamos seu e-mail só para enviar o seu Mapa.</p>
+          <p className="mt-3 text-sm text-muted">
+            Usamos seus dados para montar e liberar o seu Mapa. Veja a{" "}
+            <Link href="/privacidade" target="_blank" className="underline underline-offset-2 hover:text-ink">
+              Política de Privacidade
+            </Link>
+            .
+          </p>
 
           <ErrorText message={error} />
 

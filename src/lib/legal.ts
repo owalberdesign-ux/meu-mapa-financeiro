@@ -3,3 +3,10 @@ export const DISCLAIMER =
 
 export const PROJECTION_DISCLAIMER =
   "Projeção matemática baseada nos dados informados e nos ajustes sugeridos. Não representa garantia de resultado.";
+
+/** Quem responde pelos dados na Política de Privacidade (/privacidade). */
+export const PRIVACY = {
+  updatedAt: "7 de outubro de 2026",
+  controller: "Walber Junior",
+  contactEmail: "owalberdesign@gmail.com",
+} as const;
