@@ -156,7 +156,7 @@ export interface Report {
   goal: Goal;
 }
 
-export type PaymentStatus = "pending" | "paid";
+export type PaymentStatus = "pending" | "paid" | "refunded";
 
 /** Espelha a tabela `diagnostics` (supabase/schema.sql). */
 export interface Diagnostic {

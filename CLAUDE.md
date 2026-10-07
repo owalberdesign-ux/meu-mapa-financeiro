@@ -18,6 +18,14 @@ score possível (tudo em `src/lib/report-builder.ts`, com testes).
 - Português do Brasil, tom claro e não punitivo. Não prometer resultado; não é consultoria financeira.
 - Se não for necessário para vender ou entregar o Mapa de R$37, não entra agora.
 
+## Servidor, banco e pagamento
+
+- Banco: schema `mapa` no projeto Supabase compartilhado com a Senny (decisão dos sócios). Nada do Mapa em `public` além das funções `public.mapa_*`, que só o `service_role` executa. Não tocar em tabelas da Senny.
+- Mudança de banco: atualize `supabase/schema.sql` e aplique como migração.
+- O conteúdo pago só sai do servidor depois do pagamento (`forClient` em `src/lib/server/diagnostics.ts`).
+- Pagamento confirmado só pelo webhook da Kiwify (`/api/webhooks/kiwify`, assinatura conferida). A simulação existe só enquanto o checkout não está configurado.
+- Segredos (secret key do Supabase, token da Kiwify) ficam só nas variáveis da Vercel.
+
 ## Visual de mapa
 
 - A landing é uma rota: hero com o mapa 3D interativo (`src/components/landing/MapScene.tsx`), seções como "Paradas" ligadas por trechos de rota (`MapBits.tsx`).

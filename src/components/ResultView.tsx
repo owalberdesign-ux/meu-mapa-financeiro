@@ -1,31 +1,61 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Diagnostic } from "@/types/diagnostic";
 import { Icon } from "@/components/Icon";
 import { FullReport, LockedReport, PreviewResult, ReadyBanner } from "@/components/report";
 import { Logo, buttonClass, buttonFullClass } from "@/components/ui";
-import { track } from "@/lib/analytics";
+import { track, trackPurchaseOnce } from "@/lib/analytics";
 import { buildCheckoutUrl, isCheckoutConfigured, PRICE_LABEL } from "@/lib/checkout";
-import { getDiagnostic, simulatePayment } from "@/lib/diagnostic-store";
+import { getDiagnostic, lastCheckout, rememberCheckout, simulatePayment } from "@/lib/diagnostic-store";
 import { firstName } from "@/lib/format";
 import { DISCLAIMER } from "@/lib/legal";
 
-type State = { status: "loading" } | { status: "missing" } | { status: "ready"; diagnostic: Diagnostic };
+type State =
+  | { status: "loading" }
+  | { status: "missing" }
+  | { status: "error" }
+  | { status: "ready"; diagnostic: Diagnostic };
+
+/** Primeiros 2 minutos depois da compra: confere a cada 4 s; depois, a cada 15 s. */
+const FAST_POLL_MS = 4_000;
+const SLOW_POLL_MS = 15_000;
+const FAST_WINDOW_MS = 120_000;
 
 export function ResultView({ id }: { id: string }) {
   const [state, setState] = useState<State>({ status: "loading" });
+  // Voltou da Kiwify (?compra=1) ou saiu daqui para o pagamento: espera a confirmação.
+  const cameFromCheckout = useSearchParams().get("compra") === "1";
+  const [awaiting, setAwaiting] = useState(false);
+  const startedAt = useRef(0);
+
+  const load = useCallback(async () => {
+    try {
+      const diagnostic = await getDiagnostic(id);
+      setState(diagnostic ? { status: "ready", diagnostic } : { status: "missing" });
+    } catch {
+      setState((prev) => (prev.status === "ready" ? prev : { status: "error" }));
+    }
+  }, [id]);
 
   useEffect(() => {
     let active = true;
-    getDiagnostic(id).then((diagnostic) => {
-      if (active) setState(diagnostic ? { status: "ready", diagnostic } : { status: "missing" });
-    });
+    getDiagnostic(id)
+      .then((diagnostic) => {
+        if (!active) return;
+        setState(diagnostic ? { status: "ready", diagnostic } : { status: "missing" });
+        if (diagnostic && diagnostic.paymentStatus !== "paid" && (cameFromCheckout || lastCheckout(2 * 3600_000) === id)) {
+          startedAt.current = Date.now();
+          setAwaiting(true);
+        }
+      })
+      .catch(() => active && setState({ status: "error" }));
     return () => {
       active = false;
     };
-  }, [id]);
+  }, [id, cameFromCheckout]);
 
   const paid = state.status === "ready" && state.diagnostic.paymentStatus === "paid";
 
@@ -33,6 +63,30 @@ export function ResultView({ id }: { id: string }) {
     if (state.status !== "ready") return;
     track(paid ? "view_report" : "view_preview");
   }, [state.status, paid]);
+
+  useEffect(() => {
+    if (paid && state.status === "ready") trackPurchaseOnce(state.diagnostic);
+  }, [paid, state]);
+
+  // Enquanto o pagamento não confirma, confere de novo sozinho e quando a pessoa volta para a aba.
+  useEffect(() => {
+    if (!awaiting || paid) return;
+    let timer: number;
+    const tick = () => {
+      const elapsed = Date.now() - startedAt.current;
+      timer = window.setTimeout(async () => {
+        await load();
+        tick();
+      }, elapsed < FAST_WINDOW_MS ? FAST_POLL_MS : SLOW_POLL_MS);
+    };
+    tick();
+    const onVisible = () => document.visibilityState === "visible" && load();
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      window.clearTimeout(timer);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [awaiting, paid, load]);
 
   return (
     <div className="mx-auto max-w-3xl px-4 pb-16 sm:px-6">
@@ -44,6 +98,8 @@ export function ResultView({ id }: { id: string }) {
         <ResultSkeleton />
       ) : state.status === "missing" ? (
         <Missing />
+      ) : state.status === "error" ? (
+        <LoadError onRetry={load} />
       ) : paid ? (
         <div className="space-y-12 animate-rise motion-reduce:animate-none">
           <ReadyBanner diagnostic={state.diagnostic} />
@@ -52,6 +108,11 @@ export function ResultView({ id }: { id: string }) {
       ) : (
         <Preview
           diagnostic={state.diagnostic}
+          awaiting={awaiting}
+          onCheckout={() => {
+            startedAt.current = Date.now();
+            setAwaiting(true);
+          }}
           onPaid={(diagnostic) => {
             setState({ status: "ready", diagnostic });
             window.scrollTo({ top: 0 });
@@ -64,13 +125,18 @@ export function ResultView({ id }: { id: string }) {
 
 function Preview({
   diagnostic,
+  awaiting,
+  onCheckout,
   onPaid,
 }: {
   diagnostic: Diagnostic;
+  awaiting: boolean;
+  onCheckout: () => void;
   onPaid: (d: Diagnostic) => void;
 }) {
   const [redirecting, setRedirecting] = useState(false);
   const previewMode = !isCheckoutConfigured();
+  const refunded = diagnostic.paymentStatus === "refunded";
 
   async function checkout() {
     setRedirecting(true);
@@ -81,6 +147,8 @@ function Preview({
       email: diagnostic.email,
     });
     if (url) {
+      rememberCheckout(diagnostic.id);
+      onCheckout();
       window.location.href = url;
       return;
     }
@@ -88,7 +156,6 @@ function Preview({
     await new Promise((r) => setTimeout(r, 700));
     const paid = await simulatePayment(diagnostic.id);
     if (paid) {
-      track("purchase", { preview: true });
       onPaid(paid);
     } else {
       setRedirecting(false);
@@ -97,6 +164,8 @@ function Preview({
 
   return (
     <div className="space-y-6 animate-rise motion-reduce:animate-none">
+      {awaiting && !redirecting ? <AwaitingPayment /> : null}
+
       <div className="pt-4">
         <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-brand-strong">
           Pré-diagnóstico
@@ -112,6 +181,11 @@ function Preview({
         report={diagnostic.report}
         cta={
           <>
+            {refunded ? (
+              <p className="mb-4 rounded-xl bg-white/10 px-3 py-2 text-center text-[13px] text-white/75">
+                O pagamento deste Mapa foi estornado, então o relatório completo voltou a ficar bloqueado.
+              </p>
+            ) : null}
             <button type="button" onClick={checkout} disabled={redirecting} className={buttonFullClass}>
               {redirecting ? (
                 <>
@@ -143,12 +217,51 @@ function Preview({
   );
 }
 
+/** Depois da compra, até o aviso da Kiwify chegar (briefing, seção 51: pagamento ainda não confirmado). */
+function AwaitingPayment() {
+  const [slow, setSlow] = useState(false);
+  useEffect(() => {
+    const t = window.setTimeout(() => setSlow(true), FAST_WINDOW_MS);
+    return () => window.clearTimeout(t);
+  }, []);
+  return (
+    <div role="status" aria-live="polite" className="mt-4 flex gap-4 rounded-3xl border border-line bg-surface p-5">
+      <span className="mt-0.5 size-6 shrink-0 animate-spin rounded-full border-[3px] border-brand-soft border-t-brand-strong motion-reduce:animate-none" />
+      <div>
+        <p className="text-[17px] font-semibold">
+          {slow ? "Ainda esperando a confirmação do pagamento" : "Confirmando seu pagamento…"}
+        </p>
+        <p className="mt-1 leading-relaxed text-muted">
+          {slow
+            ? "PIX pode levar alguns minutos para confirmar. Pode deixar esta página aberta ou voltar por este mesmo link mais tarde: o Mapa completo aparece aqui assim que o pagamento for aprovado."
+            : "Cartão e PIX costumam confirmar em poucos segundos. Esta página atualiza sozinha."}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function LoadError({ onRetry }: { onRetry: () => void }) {
+  return (
+    <div className="pt-10 text-center">
+      <h1 className="text-2xl font-semibold tracking-tight">Não conseguimos abrir seu diagnóstico agora.</h1>
+      <p className="mx-auto mt-3 max-w-md text-muted">Confira sua conexão e tente de novo em instantes.</p>
+      <div className="mt-8">
+        <button type="button" onClick={onRetry} className={buttonClass}>
+          Tentar de novo
+          <Icon name="arrowRight" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function Missing() {
   return (
     <div className="pt-10 text-center">
       <h1 className="text-2xl font-semibold tracking-tight">Não encontramos este diagnóstico.</h1>
       <p className="mx-auto mt-3 max-w-md text-muted">
-        Ele pode ter sido feito em outro aparelho ou navegador. Refaça o quiz para gerar um novo Mapa.
+        Confira se o link está completo. Se o problema continuar, refaça o quiz para gerar um novo Mapa.
       </p>
       <div className="mt-8">
         <Link href="/diagnostico" className={buttonClass}>
