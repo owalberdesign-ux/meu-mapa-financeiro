@@ -32,7 +32,9 @@ npm run build
 | `src/lib/checkout.ts` | `buildCheckoutUrl` — único lugar com a URL da Kiwify (`s1` = ID do diagnóstico) |
 | `src/lib/diagnostic-store.ts` | Onde o diagnóstico fica salvo (hoje no navegador; fase 2: Supabase) |
 | `src/lib/analytics.ts` | Eventos do funil (`view_landing` … `download_pdf`) no `dataLayer`, prontos para Pixel/GA |
-| `src/components/report.tsx` | Pré-diagnóstico, bloqueio, relatório completo; o PDF é o relatório impresso (A4) |
+| `src/components/report.tsx` | Pré-diagnóstico, bloqueio e relatório completo na tela |
+| `src/lib/report-insights.ts` | Leituras do PDF: pilares do score, indicadores com estado, fatias da renda, cenários |
+| `src/components/pdf/` | PDF de 7 páginas (`@react-pdf/renderer`), gerado no navegador e carregado só no clique |
 | `supabase/schema.sql` | Tabela `diagnostics` da fase 2 |
 
 ## Estado atual (primeira entrega)
@@ -40,7 +42,10 @@ npm run build
 - Tudo calculado no navegador; o diagnóstico fica salvo no aparelho da pessoa.
 - Sem `NEXT_PUBLIC_KIWIFY_CHECKOUT_URL`, o botão de compra **simula o pagamento** (modo prévia) para
   mostrar a entrega. Com a variável preenchida, o botão leva ao checkout com `name`, `email` e `s1`.
-- PDF: botão "Baixar meu Raio-X em PDF" abre a impressão do navegador com layout A4 de 6 páginas.
+- PDF: botão "Baixar meu Raio-X em PDF" gera um arquivo A4 de 7 páginas com os números da pessoa
+  (capa, resultado, renda, indicadores, pontos de atenção, projeção, plano). O layout é fixo; textos,
+  cores de estado, gráficos e plano mudam conforme as respostas. Se a geração falhar, cai na impressão.
+- Fonte do PDF: Geist (SIL OFL) em `public/fonts`.
 
 ## Próxima etapa
 

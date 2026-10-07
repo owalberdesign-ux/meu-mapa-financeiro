@@ -151,7 +151,7 @@ export function ReadyBanner({ diagnostic }: { diagnostic: Diagnostic }) {
           <Icon name="arrowRight" />
         </a>
         <PdfButton
-          name={diagnostic.name}
+          diagnostic={diagnostic}
           className="inline-flex h-14 w-full items-center justify-center gap-2 rounded-2xl border border-white/20 px-6 text-[15px] font-semibold uppercase tracking-wide text-white transition hover:bg-white/10 sm:w-auto"
         />
       </div>
