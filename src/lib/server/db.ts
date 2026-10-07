@@ -6,6 +6,7 @@
  */
 import type { Answers, Diagnostic, PaymentStatus, Report } from "@/types/diagnostic";
 import { buildReport } from "@/lib/report-builder";
+import type { Tracking } from "@/lib/server/meta-capi";
 
 const SUPABASE_URL = process.env.SUPABASE_URL ?? "";
 const SECRET_KEY = process.env.SUPABASE_SECRET_KEY ?? "";
@@ -44,6 +45,7 @@ interface Row {
   payment_id: string | null;
   created_at: string;
   paid_at: string | null;
+  tracking: Tracking | null;
 }
 
 function toDiagnostic(row: Row): Diagnostic {
@@ -61,7 +63,12 @@ function toDiagnostic(row: Row): Diagnostic {
   };
 }
 
-export async function insertDiagnostic(input: { name: string; email: string; answers: Answers }): Promise<Diagnostic> {
+export async function insertDiagnostic(input: {
+  name: string;
+  email: string;
+  answers: Answers;
+  tracking?: Tracking;
+}): Promise<Diagnostic> {
   const report = buildReport(input.answers);
   const row = await rpc<Row>("mapa_create_diagnostic", {
     p_row: {
@@ -72,6 +79,7 @@ export async function insertDiagnostic(input: { name: string; email: string; ans
       profile: report.profile,
       primary_problem: report.primaryProblem,
       report_data: report,
+      tracking: input.tracking ?? null,
     },
   });
   return toDiagnostic(row);
@@ -82,6 +90,14 @@ export async function findDiagnostic(id: string): Promise<Diagnostic | null> {
   return row ? toDiagnostic(row) : null;
 }
 
+/** Dados para avisar a compra ao Meta (só no servidor; não vão para a tela). */
+export async function findConversionContext(
+  id: string,
+): Promise<{ name: string; email: string; tracking: Tracking | null } | null> {
+  const row = await rpc<Row | null>("mapa_get_diagnostic", { p_id: id });
+  return row ? { name: row.name, email: row.email, tracking: row.tracking } : null;
+}
+
 export interface PaymentEvent {
   diagnosticId: string | null;
   orderId: string | null;
@@ -89,6 +105,8 @@ export interface PaymentEvent {
   eventType: string | null;
   orderStatus: string | null;
   email: string | null;
+  /** Só para o aviso ao Meta; não vai para o banco. */
+  phone?: string | null;
 }
 
 /** Registra o aviso de pagamento e, quando dá para associar, atualiza o diagnóstico. */

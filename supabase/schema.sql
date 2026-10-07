@@ -21,8 +21,12 @@ create table if not exists mapa.diagnostics (
   payment_id text,
   created_at timestamptz not null default now(),
   paid_at timestamptz,
-  refunded_at timestamptz
+  refunded_at timestamptz,
+  -- Identificadores do anúncio (cookies do Pixel, navegador, IP) para o aviso de compra ao Meta.
+  tracking jsonb
 );
+
+alter table mapa.diagnostics add column if not exists tracking jsonb;
 
 create index if not exists diagnostics_email_idx on mapa.diagnostics (email, created_at desc);
 create index if not exists diagnostics_payment_idx on mapa.diagnostics (payment_id);
@@ -51,7 +55,7 @@ as $$
 declare
   v_row mapa.diagnostics;
 begin
-  insert into mapa.diagnostics (name, email, answers, score, profile, primary_problem, report_data)
+  insert into mapa.diagnostics (name, email, answers, score, profile, primary_problem, report_data, tracking)
   values (
     p_row ->> 'name',
     lower(p_row ->> 'email'),
@@ -59,7 +63,8 @@ begin
     (p_row ->> 'score')::smallint,
     p_row ->> 'profile',
     p_row ->> 'primary_problem',
-    p_row -> 'report_data'
+    p_row -> 'report_data',
+    p_row -> 'tracking'
   )
   returning * into v_row;
   return to_jsonb(v_row);

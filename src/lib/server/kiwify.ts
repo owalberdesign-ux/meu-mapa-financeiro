@@ -62,5 +62,6 @@ export function parseOrder(payload: unknown): PaymentEvent {
     eventType,
     orderStatus,
     email: text(pick(customer, "email"))?.toLowerCase() ?? null,
+    phone: text(pick(customer, "mobile", "phone")),
   };
 }

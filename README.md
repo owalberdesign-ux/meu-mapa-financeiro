@@ -42,6 +42,7 @@ npm run build
 | `src/lib/server/db.ts` | Supabase (schema `mapa`) pelas funções `public.mapa_*`, com a secret key |
 | `src/lib/server/diagnostics.ts` | Validação do quiz e bloqueio do conteúdo pago antes da confirmação |
 | `src/lib/server/kiwify.ts` | Assinatura e leitura dos avisos da Kiwify |
+| `src/lib/server/meta-capi.ts` | Compra para a API de Conversões do Meta (mesmo `event_id` do Pixel) |
 | `src/lib/analytics.ts` + `src/components/Analytics.tsx` | Eventos do funil para Meta Pixel e GA4 (só com ID configurado) |
 | `src/components/report.tsx` | Pré-diagnóstico, bloqueio e relatório completo na tela |
 | `src/lib/report-insights.ts` | Leituras do PDF: pilares do score, indicadores com estado, fatias da renda, cenários |
@@ -58,6 +59,8 @@ npm run build
 | `KIWIFY_WEBHOOK_TOKEN` | Token do webhook, para conferir a assinatura | Webhook recusa os avisos (503) |
 | `NEXT_PUBLIC_META_PIXEL_ID` | Meta Pixel | Pixel não carrega |
 | `NEXT_PUBLIC_GA_ID` | GA4 (`G-…`) | GA não carrega |
+| `META_CAPI_TOKEN` | Token da API de Conversões (só servidor) | A compra só é contada pelo navegador |
+| `META_CAPI_TEST_CODE` | Código de "Testar eventos" do Meta (opcional) | Envio normal |
 
 Variáveis `NEXT_PUBLIC_*` entram no build: depois de mudar, publique de novo.
 
@@ -71,6 +74,9 @@ Variáveis `NEXT_PUBLIC_*` entram no build: depois de mudar, publique de novo.
    reembolso e chargeback. Copie o token para `KIWIFY_WEBHOOK_TOKEN`.
 4. Pixel: configure só no site (variável acima), não no produto da Kiwify — a compra é contada pelo
    site, uma vez por diagnóstico, e contaria duas vezes.
+5. API de Conversões: com `META_CAPI_TOKEN`, o webhook também avisa a compra ao Meta pelo servidor
+   (com hash do e-mail/telefone e os cookies `_fbp`/`_fbc` guardados no diagnóstico). O `event_id` é o
+   ID do diagnóstico, o mesmo do Pixel, então o Meta deduplica.
 
 O aviso de venda acha o diagnóstico pelo `s1`; sem `s1`, pelo pedido já conhecido (reembolso) ou
 pelo diagnóstico pendente mais recente do mesmo e-mail nos últimos 7 dias. Todo aviso fica

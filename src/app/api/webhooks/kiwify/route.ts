@@ -1,6 +1,7 @@
 import type { NextRequest } from "next/server";
-import { isDatabaseConfigured, recordPayment } from "@/lib/server/db";
+import { findConversionContext, isDatabaseConfigured, recordPayment } from "@/lib/server/db";
 import { isValidSignature, parseOrder } from "@/lib/server/kiwify";
+import { isConversionsApiConfigured, sendPurchase } from "@/lib/server/meta-capi";
 
 /** Confirmação de pagamento da Kiwify (briefing, seção 44). */
 export async function POST(request: NextRequest) {
@@ -32,6 +33,17 @@ export async function POST(request: NextRequest) {
       diagnostic: result.diagnosticId,
       applied: result.applied,
     });
+    if (event.status === "paid" && result.applied && result.diagnosticId && isConversionsApiConfigured()) {
+      const context = await findConversionContext(result.diagnosticId).catch(() => null);
+      await sendPurchase({
+        diagnosticId: result.diagnosticId,
+        emails: [context?.email, event.email],
+        phone: event.phone,
+        name: context?.name,
+        tracking: context?.tracking,
+        siteUrl: request.nextUrl.origin,
+      });
+    }
     return Response.json({ ok: true, applied: result.applied });
   } catch (error) {
     // 500 faz a Kiwify tentar de novo.

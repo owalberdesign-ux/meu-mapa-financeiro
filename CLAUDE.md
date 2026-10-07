@@ -24,7 +24,8 @@ score possível (tudo em `src/lib/report-builder.ts`, com testes).
 - Mudança de banco: atualize `supabase/schema.sql` e aplique como migração.
 - O conteúdo pago só sai do servidor depois do pagamento (`forClient` em `src/lib/server/diagnostics.ts`).
 - Pagamento confirmado só pelo webhook da Kiwify (`/api/webhooks/kiwify`, assinatura conferida). A simulação existe só enquanto o checkout não está configurado.
-- Segredos (secret key do Supabase, token da Kiwify) ficam só nas variáveis da Vercel.
+- Segredos (secret key do Supabase, token da Kiwify, token da API de Conversões do Meta) ficam só nas variáveis da Vercel.
+- Compra no Meta: Pixel no navegador + API de Conversões no webhook, sempre com `event_id` = ID do diagnóstico (deduplicação). Pixel só no site, nunca também na Kiwify.
 
 ## Visual de mapa
 

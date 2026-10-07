@@ -44,6 +44,7 @@ describe("leitura do pedido", () => {
       eventType: "order_approved",
       orderStatus: "paid",
       email: "mariana@exemplo.com",
+      phone: null,
     });
   });
 
