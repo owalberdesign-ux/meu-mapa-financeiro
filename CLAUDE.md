@@ -18,6 +18,13 @@ score possível (tudo em `src/lib/report-builder.ts`, com testes).
 - Português do Brasil, tom claro e não punitivo. Não prometer resultado; não é consultoria financeira.
 - Se não for necessário para vender ou entregar o Mapa de R$37, não entra agora.
 
+## Visual de mapa
+
+- A landing é uma rota: hero com o mapa 3D interativo (`src/components/landing/MapScene.tsx`), seções como "Paradas" ligadas por trechos de rota (`MapBits.tsx`).
+- Peças 3D em `public/3d/`: WebP na web, PNG no PDF (o react-pdf não lê WebP). Mesmo prompt/estilo para peças novas.
+- `public/pdf-preview/*.webp` são páginas reais do PDF do exemplo (`/exemplo`). Quando o PDF mudar, gere de novo.
+- PDF: capa com a rota das 7 partes clicável e, no topo de cada parte, as paradas clicáveis (`STOPS` em `src/components/pdf/parts.tsx`). Continua com 8 páginas.
+
 ## Comandos
 
 - `npm run dev` · `npm run build` · `npm run lint` · `npm test` (Vitest: motor, relatório e leituras do PDF)

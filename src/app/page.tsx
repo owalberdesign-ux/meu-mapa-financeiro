@@ -2,7 +2,9 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { Icon, type IconName } from "@/components/Icon";
 import { TrackView } from "@/components/TrackView";
-import { HeroMockup } from "@/components/landing/HeroMockup";
+import { IncomeStart } from "@/components/landing/IncomeStart";
+import { Float3D, RouteDivider, StopChip } from "@/components/landing/MapBits";
+import { MapScene } from "@/components/landing/MapScene";
 import {
   IncomeBar,
   StepAnswer,
@@ -119,24 +121,23 @@ function StartLink({ children, full = false }: { children: ReactNode; full?: boo
 }
 
 function SectionHeading({
-  eyebrow,
+  stop,
+  label,
   title,
   text,
   dark = false,
 }: {
-  eyebrow: string;
+  /** Número da parada na rota da página; sem número é o destino. */
+  stop?: number;
+  label: string;
   title: string;
   text?: string;
   dark?: boolean;
 }) {
   return (
     <div className="max-w-2xl">
-      <p
-        className={`text-[13px] font-semibold uppercase tracking-[0.14em] ${dark ? "text-brand" : "text-brand-strong"}`}
-      >
-        {eyebrow}
-      </p>
-      <h2 className="mt-3 text-[2rem] font-semibold leading-[1.1] tracking-tight text-balance sm:text-[2.6rem]">
+      <StopChip n={stop} label={label} dark={dark} />
+      <h2 className="mt-4 text-[2rem] font-semibold leading-[1.1] tracking-tight text-balance sm:text-[2.6rem]">
         {title}
       </h2>
       {text ? (
@@ -158,7 +159,7 @@ function Tile({
   children: ReactNode;
 }) {
   return (
-    <div className={`reveal flex flex-col rounded-3xl bg-surface p-5 text-ink sm:p-6 ${className}`}>
+    <div className={`reveal tilt-hover flex flex-col rounded-3xl bg-surface p-5 text-ink sm:p-6 ${className}`}>
       <h3 className="text-[17px] font-semibold tracking-tight">{title}</h3>
       <p className="mt-1 text-[14px] leading-snug text-muted">{text}</p>
       <div className="mt-5 flex-1">{children}</div>
@@ -183,13 +184,13 @@ export default function LandingPage() {
       </header>
 
       <main>
-        {/* 01 — Hero */}
+        {/* Você está aqui */}
         <section className="relative isolate overflow-hidden">
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0 -z-10 bg-grid [mask-image:radial-gradient(ellipse_90%_70%_at_60%_10%,black_20%,transparent_75%)]"
+            className="pointer-events-none absolute inset-0 -z-10 bg-contours [mask-image:radial-gradient(ellipse_90%_75%_at_70%_20%,black_25%,transparent_80%)]"
           />
-          <div className="mx-auto grid max-w-6xl gap-6 px-4 pt-6 pb-16 sm:px-6 lg:grid-cols-[1.05fr_1fr] lg:items-center lg:gap-12 lg:pt-12 lg:pb-24">
+          <div className="mx-auto grid max-w-6xl gap-4 px-4 pt-6 pb-6 sm:px-6 lg:grid-cols-[1fr_1.05fr] lg:items-center lg:gap-10 lg:pt-10 lg:pb-10">
             <div>
               <p className="inline-flex items-center gap-2 rounded-full border border-line bg-surface/80 py-1 pr-3.5 pl-2.5 text-[13px] font-medium shadow-sm backdrop-blur">
                 <span className="relative flex size-2">
@@ -198,7 +199,7 @@ export default function LandingPage() {
                 </span>
                 Diagnóstico financeiro personalizado
               </p>
-              <h1 className="mt-5 text-[2.6rem] font-semibold leading-[1.02] tracking-[-0.035em] text-balance sm:text-[4.2rem]">
+              <h1 className="mt-5 text-[2.6rem] font-semibold leading-[1.02] tracking-[-0.035em] text-balance sm:text-[4rem]">
                 Seu salário{" "}
                 <span className="bg-linear-to-r from-ink from-20% to-ink/15 bg-clip-text text-transparent">
                   some
@@ -206,9 +207,16 @@ export default function LandingPage() {
                 e você não sabe onde foi parar?
               </h1>
               <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted sm:text-xl">
-                Descubra como está sua vida financeira, quanto da sua renda já está comprometida e qual
-                deve ser sua prioridade nos próximos 30 dias.
+                Seu Mapa Financeiro mostra onde você está, quanto da sua renda já está comprometida e a
+                rota, com prazos, até o seu objetivo.
               </p>
+              <div id="hero-cta" className="mt-7 max-w-xl">
+                <IncomeStart />
+                <p className="mt-3 flex items-center gap-2 px-1 text-sm text-muted">
+                  <Icon name="shield" className="size-4 shrink-0 text-brand-strong" />
+                  Leva cerca de 3 minutos. Sem conectar sua conta bancária.
+                </p>
+              </div>
               <ul className="mt-6 grid gap-2 text-[15px] sm:grid-cols-2 sm:gap-x-6">
                 {HERO_BENEFITS.map((b) => (
                   <li key={b} className="flex items-center gap-2.5">
@@ -219,24 +227,24 @@ export default function LandingPage() {
                   </li>
                 ))}
               </ul>
-              <div id="hero-cta" className="mt-8">
-                <StartLink>Fazer meu Mapa Financeiro</StartLink>
-                <p className="mt-3 flex items-center gap-2 text-sm text-muted">
-                  <Icon name="shield" className="size-4 shrink-0 text-brand-strong" />
-                  Leva cerca de 3 minutos. Sem conectar sua conta bancária.
-                </p>
-              </div>
             </div>
-            <HeroMockup />
+            <MapScene />
           </div>
         </section>
 
-        {/* 02 — Dor */}
-        <section className="border-y border-line bg-surface">
-          <div className="mx-auto grid max-w-6xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:items-center lg:gap-16 lg:py-24">
+        <RouteDivider />
+
+        {/* Parada 1 — O problema */}
+        <section className="px-4 sm:px-6">
+          <div className="relative isolate mx-auto grid max-w-6xl gap-10 overflow-hidden rounded-[2rem] border border-line bg-surface p-6 sm:p-10 lg:grid-cols-2 lg:items-center lg:gap-16 lg:p-14">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 -z-10 bg-contours opacity-60 [mask-image:linear-gradient(to_left,black,transparent_60%)]"
+            />
             <div>
               <SectionHeading
-                eyebrow="O problema"
+                stop={1}
+                label="O problema"
                 title="Você não precisa ganhar mais para começar a entender o problema."
                 text="Muitas vezes, o problema não é apenas quanto entra. É quanto da sua renda já está comprometida antes mesmo do mês começar."
               />
@@ -254,44 +262,68 @@ export default function LandingPage() {
                 ))}
               </ul>
             </div>
-            <div className="reveal">
+            <div className="reveal relative">
+              <Float3D name="coins" className="absolute -top-14 -right-3 w-20 sm:-top-16 sm:w-28" />
               <IncomeBar />
             </div>
           </div>
         </section>
 
-        {/* 03 — Como funciona */}
-        <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-24">
-          <SectionHeading eyebrow="Como funciona" title="Em poucos minutos você entende sua situação." />
-          <ol className="mt-10 grid gap-4 md:grid-cols-3">
+        <RouteDivider flip />
+
+        {/* Parada 2 — Como funciona */}
+        <section className="relative mx-auto max-w-6xl px-4 sm:px-6">
+          <Float3D name="calendar" delay={2} className="absolute top-0 right-4 hidden w-28 md:block lg:w-36" />
+          <SectionHeading stop={2} label="Como funciona" title="Em poucos minutos você entende sua situação." />
+          <ol className="relative mt-10 grid gap-5 md:grid-cols-3 md:gap-4">
+            <span
+              aria-hidden="true"
+              className="absolute top-5 bottom-5 left-[19px] border-l-[3px] border-dashed border-brand/45 md:top-[19px] md:right-[16%] md:bottom-auto md:left-[16%] md:border-t-[3px] md:border-l-0"
+            />
             {STEPS.map((s, i) => (
-              <li key={s.title} className="reveal rounded-3xl border border-line bg-surface p-5 sm:p-6">
-                {s.art}
-                <p className="mt-6 text-sm font-semibold tabular-nums text-brand-strong">0{i + 1}</p>
-                <h3 className="mt-1 text-xl font-semibold tracking-tight">{s.title}</h3>
-                <p className="mt-1.5 leading-relaxed text-muted">{s.text}</p>
+              <li key={s.title} className="reveal relative grid grid-cols-[40px_1fr] gap-4 md:grid-cols-1">
+                <span className="relative grid size-10 place-items-center rounded-full bg-brand-strong text-[15px] font-semibold tabular-nums text-white ring-8 ring-canvas md:mx-auto">
+                  {i + 1}
+                </span>
+                <div className="tilt-hover rounded-3xl border border-line bg-surface p-5 sm:p-6">
+                  {s.art}
+                  <h3 className="mt-6 text-xl font-semibold tracking-tight">{s.title}</h3>
+                  <p className="mt-1.5 leading-relaxed text-muted">{s.text}</p>
+                </div>
               </li>
             ))}
           </ol>
           <div className="mt-10">
-            <StartLink>Começar meu diagnóstico</StartLink>
+            <StartLink>Começar meu Mapa</StartLink>
           </div>
         </section>
 
-        {/* 04 — O que o cliente recebe */}
-        <section className="relative isolate overflow-hidden bg-ink text-white">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 -z-10 bg-grid-light [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,black,transparent)]"
-          />
-          <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-24">
-            <SectionHeading
-              dark
-              eyebrow="O que você recebe"
-              title="Seu Mapa mostra onde você está e a rota até onde quer chegar."
-              text="Feito a partir das suas respostas: cada número explicado, cada etapa com prazo e cada semana com tarefas."
+        <RouteDivider />
+
+        {/* Parada 3 — O que o cliente recebe */}
+        <section className="px-4 sm:px-6">
+          <div className="relative isolate mx-auto max-w-6xl overflow-hidden rounded-[2rem] bg-ink p-6 text-white sm:p-10 lg:p-14">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 -z-10 bg-contours-light [mask-image:radial-gradient(ellipse_80%_60%_at_80%_0%,black,transparent)]"
             />
-            <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:grid-rows-2">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -top-32 -right-24 -z-10 size-96 rounded-full bg-brand/25 blur-3xl"
+            />
+            <div className="grid gap-6 lg:grid-cols-[1fr_0.8fr] lg:items-center">
+              <SectionHeading
+                dark
+                stop={3}
+                label="O que você recebe"
+                title="Seu Mapa mostra onde você está e a rota até onde quer chegar."
+                text="Feito a partir das suas respostas: cada número explicado, cada etapa com prazo e cada semana com tarefas."
+              />
+              <div className="relative mx-auto w-full max-w-md">
+                <Float3D name="map" parallax={false} className="w-full" />
+              </div>
+            </div>
+            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:grid-rows-2">
               <Tile
                 title="Score de 0 a 100"
                 text="Seu perfil financeiro em uma escala simples."
@@ -331,68 +363,70 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* 05 — Oferta */}
-        <section id="oferta" className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-24">
-          <div className="reveal relative isolate grid overflow-hidden rounded-[2rem] bg-ink text-white lg:grid-cols-[1.1fr_1fr]">
+        <RouteDivider flip />
+
+        {/* Destino — Oferta */}
+        <section id="oferta" className="mx-auto max-w-6xl scroll-mt-6 px-4 pb-16 sm:px-6 lg:pb-24">
+          <div className="reveal relative isolate grid overflow-hidden rounded-[2rem] border border-line bg-surface lg:grid-cols-[1.1fr_1fr]">
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute inset-0 -z-10 bg-grid-light [mask-image:linear-gradient(to_bottom,black,transparent)]"
+              className="pointer-events-none absolute inset-0 -z-10 bg-contours opacity-70 [mask-image:linear-gradient(to_bottom,black,transparent_70%)]"
             />
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute -top-24 -right-24 -z-10 size-80 rounded-full bg-brand/30 blur-3xl"
-            />
-            <div className="p-7 sm:p-10">
-              <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-brand">
-                Pagamento único
-              </p>
-              <h2 className="mt-3 text-[2rem] font-semibold leading-tight tracking-tight sm:text-4xl">
+            <div className="relative p-7 sm:p-10">
+              <Float3D name="flag" delay={4} className="absolute top-4 right-4 w-16 sm:top-8 sm:right-8 sm:w-24 lg:right-4" />
+              <StopChip label="Pagamento único" />
+              <h2 className="mt-4 max-w-[15ch] text-[2rem] font-semibold leading-tight tracking-tight sm:text-4xl">
                 Desbloqueie seu Mapa Financeiro completo
               </h2>
               <p className="mt-6 flex items-start gap-1.5 leading-none">
-                <span className="mt-3 text-2xl font-medium text-white/70">R$</span>
+                <span className="mt-3 text-2xl font-medium text-muted">R$</span>
                 <span className="text-8xl font-semibold tracking-tighter">37</span>
               </p>
-              <p className="mt-5 max-w-md leading-relaxed text-white/75">
-                Um diagnóstico personalizado da sua situação financeira, com prioridades claras e um
-                plano simples para os próximos 30 dias.
+              <p className="mt-5 max-w-md leading-relaxed text-muted">
+                Um diagnóstico personalizado da sua situação financeira, com prioridades claras, a rota até o
+                seu objetivo e um plano simples para os próximos 30 dias.
               </p>
               <div className="mt-8">
                 <StartLink full>Quero ver meu Mapa completo</StartLink>
               </div>
-              <ul className="mt-6 grid gap-3 text-[14px] text-white/75 sm:grid-cols-2">
+              <ul className="mt-6 grid gap-3 text-[14px] text-muted sm:grid-cols-2">
                 {OFFER_INFO.map((o) => (
                   <li key={o.text} className="flex items-center gap-2.5">
-                    <Icon name={o.icon} className="size-4 shrink-0 text-brand" />
+                    <Icon name={o.icon} className="size-4 shrink-0 text-brand-strong" />
                     {o.text}
                   </li>
                 ))}
               </ul>
             </div>
-            <div className="border-t border-white/10 p-7 sm:p-10 lg:border-t-0 lg:border-l">
+            <div className="border-t border-line bg-canvas/70 p-7 sm:p-10 lg:border-t-0 lg:border-l">
               <p className="text-[15px] font-semibold">Ao desbloquear, você vê:</p>
-              <ul className="mt-5 space-y-3">
-                {UNLOCKS.map((u) => (
-                  <li key={u} className="flex items-center gap-3 rounded-2xl bg-white/5 px-4 py-3.5 text-[15px]">
-                    <span className="grid size-7 shrink-0 place-items-center rounded-full bg-brand text-ink">
+              <ol className="relative mt-5 space-y-3">
+                {UNLOCKS.map((u, i) => (
+                  <li key={u} className="flex items-center gap-3 rounded-2xl bg-surface px-4 py-3.5 text-[15px] shadow-[0_1px_0_rgba(20,23,20,0.04)] ring-1 ring-line">
+                    <span className="grid size-7 shrink-0 place-items-center rounded-full bg-brand-strong text-white">
                       <Icon name="check" className="size-4" strokeWidth={3} />
+                      <span className="sr-only">Item {i + 1}</span>
                     </span>
                     {u}
                   </li>
                 ))}
-              </ul>
-              <p className="mt-6 flex items-center gap-2 text-[13px] text-white/60">
-                <Icon name="shield" className="size-4 shrink-0" />
+              </ol>
+              <p className="mt-6 flex items-center gap-2 text-[13px] text-muted">
+                <Icon name="shield" className="size-4 shrink-0 text-brand-strong" />
                 Seu score e o pré-diagnóstico aparecem antes do pagamento.
               </p>
             </div>
           </div>
         </section>
 
-        {/* 06 — FAQ */}
+        {/* Dúvidas */}
         <section className="border-t border-line bg-surface">
           <div className="mx-auto grid max-w-6xl gap-8 px-4 py-16 sm:px-6 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16 lg:py-24">
-            <SectionHeading eyebrow="Dúvidas" title="Perguntas frequentes" />
+            <div className="max-w-2xl">
+              <h2 className="text-[2rem] font-semibold leading-[1.1] tracking-tight text-balance sm:text-[2.6rem]">
+                Perguntas frequentes
+              </h2>
+            </div>
             <div className="space-y-2.5">
               {FAQ.map((f) => (
                 <details key={f.q} className="group rounded-2xl bg-canvas px-5 open:bg-surface open:ring-1 open:ring-line">

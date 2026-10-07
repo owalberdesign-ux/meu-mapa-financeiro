@@ -1,6 +1,7 @@
+import Image from "next/image";
 import { Icon } from "@/components/Icon";
 import { ScoreCard } from "@/components/ScoreCard";
-import { LogoMark, Meter, StatusBadge } from "@/components/ui";
+import { Meter, StatusBadge } from "@/components/ui";
 import { brl, pct } from "@/lib/format";
 import { PROFILE_LABEL, PROFILE_TONE } from "@/lib/report-builder";
 import { scorePillars } from "@/lib/report-insights";
@@ -255,44 +256,27 @@ export function TilePlan() {
 }
 
 /** Capa do PDF atual (escura, com o medidor) sobre uma página interna. */
+/** Páginas reais do PDF do exemplo (geradas de public/pdf-preview a partir do PDF de verdade). */
 export function TilePdf() {
-  const r = 34;
-  const f = report.score / 100;
-  const a = Math.PI * (1 - f);
-  const end = { x: 45 + r * Math.cos(a), y: 44 - r * Math.sin(a) };
   return (
-    <div className="relative mx-auto h-48 w-40">
-      <div className="absolute top-3 left-9 h-44 w-32 rotate-[6deg] rounded-lg border border-line bg-surface p-3 shadow-[0_18px_40px_-24px_rgba(20,23,20,0.45)]">
-        <p className="text-[6px] font-semibold uppercase tracking-[0.14em] text-brand-strong">06 · Sua rota</p>
-        <div className="mt-2 space-y-2">
-          {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="flex items-center gap-1.5">
-              <span className={`size-2 rounded-full ${i === 3 ? "bg-brand" : "bg-brand-soft"}`} />
-              <span className="h-1 flex-1 rounded bg-track" />
-            </div>
-          ))}
-        </div>
-      </div>
-      <div className="absolute top-0 left-0 h-44 w-32 rotate-[-5deg] overflow-hidden rounded-lg bg-ink p-3 text-white shadow-[0_22px_44px_-18px_rgba(20,23,20,0.6)]">
-        <div className="absolute inset-0 bg-grid-light opacity-70" />
-        <div className="relative">
-          <div className="flex items-center gap-1">
-            <LogoMark className="size-3.5" />
-            <span className="text-[5.5px] font-semibold uppercase tracking-[0.16em]">Meu Mapa Financeiro</span>
-          </div>
-          <p className="mt-3 text-[6px] text-white/60">Diagnóstico financeiro de</p>
-          <p className="text-[11px] font-semibold leading-tight">Mariana Souza</p>
-          <svg viewBox="0 0 90 50" className="mx-auto mt-2 w-[84px]" aria-hidden="true">
-            <path d="M 11 44 A 34 34 0 0 1 79 44" fill="none" stroke="#2A302B" strokeWidth="8" strokeLinecap="round" />
-            <path d={`M 11 44 A 34 34 0 0 1 ${end.x.toFixed(1)} ${end.y.toFixed(1)}`} fill="none" stroke="#f59e0b" strokeWidth="8" strokeLinecap="round" />
-            <text x="45" y="43" textAnchor="middle" fill="#ffffff" fontSize="17" fontWeight="600">{report.score}</text>
-          </svg>
-          <p className="mx-auto mt-1 w-fit rounded-full bg-warn px-1.5 py-0.5 text-[5.5px] font-bold uppercase text-ink">
-            No limite
-          </p>
-        </div>
-      </div>
-      <span className="absolute -right-1 -bottom-1 rounded-lg bg-brand-strong px-2 py-1 text-[10px] font-bold text-white">
+    <div className="relative mx-auto h-60 w-52">
+      <Image
+        src="/pdf-preview/rota.webp"
+        alt="Página Sua rota do PDF do exemplo"
+        width={432}
+        height={611}
+        sizes="144px"
+        className="absolute top-4 left-14 h-auto w-36 rotate-[6deg] rounded-md shadow-[0_18px_40px_-24px_rgba(20,23,20,0.5)] ring-1 ring-line"
+      />
+      <Image
+        src="/pdf-preview/capa.webp"
+        alt="Capa do PDF do exemplo, com o score e a rota das sete partes"
+        width={432}
+        height={611}
+        sizes="144px"
+        className="absolute top-0 left-0 h-auto w-36 rotate-[-5deg] rounded-md shadow-[0_22px_44px_-18px_rgba(20,23,20,0.6)]"
+      />
+      <span className="absolute right-0 bottom-0 rounded-lg bg-brand-strong px-2 py-1 text-[10px] font-bold text-white">
         PDF · 8 páginas
       </span>
     </div>

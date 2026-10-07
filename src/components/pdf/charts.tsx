@@ -287,26 +287,69 @@ export function ScenarioChart({
   );
 }
 
-/* ---------- Fundo da capa: grade + brilho verde ---------- */
+/* ---------- Fundo da capa: curvas de nível + brilho verde ---------- */
+
+/** Anel de curva de nível levemente irregular (determinístico: mesmo desenho sempre). */
+function contourRing(cx: number, cy: number, r: number, seed: number) {
+  const n = 56;
+  const pts: string[] = [];
+  for (let i = 0; i < n; i++) {
+    const a = (i / n) * Math.PI * 2;
+    const k = 1 + 0.12 * Math.sin(3 * a + seed) + 0.06 * Math.sin(5 * a + seed * 1.7) + 0.035 * Math.cos(7 * a + seed * 0.6);
+    pts.push(`${(cx + r * k * Math.cos(a)).toFixed(1)} ${(cy + r * k * 0.8 * Math.sin(a)).toFixed(1)}`);
+  }
+  return `M ${pts.join(" L ")} Z`;
+}
+
+const PEAKS: { x: number; y: number; rings: number; seed: number }[] = [
+  { x: 0.84, y: 0.15, rings: 9, seed: 0.4 },
+  { x: 0.04, y: 0.52, rings: 7, seed: 2.1 },
+  { x: 0.78, y: 0.86, rings: 6, seed: 4.3 },
+];
 
 export function CoverBackdrop({ width, height }: { width: number; height: number }) {
-  const step = 28;
-  const lines = [];
-  for (let x = step; x < width; x += step) lines.push(<Line key={`v${x}`} x1={x} y1={0} x2={x} y2={height * 0.62} stroke="#FFFFFF" strokeOpacity={0.05} strokeWidth={0.6} />);
-  for (let y = step; y < height * 0.62; y += step) lines.push(<Line key={`h${y}`} x1={0} y1={y} x2={width} y2={y} stroke="#FFFFFF" strokeOpacity={0.05} strokeWidth={0.6} />);
   return (
     <View fixed style={{ position: "absolute", top: 0, left: 0, width, height }}>
-    <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
-      <Defs>
-        <RadialGradient id="glow" cx="50%" cy="50%" r="50%">
-          <Stop offset="0%" stopColor={C.brand} stopOpacity={0.32} />
-          <Stop offset="100%" stopColor={C.brand} stopOpacity={0} />
-        </RadialGradient>
-      </Defs>
-      <Rect x={0} y={0} width={width} height={height} fill={C.ink} />
-      {lines}
-      <Circle cx={width / 2} cy={height * 0.46} r={230} fill="url(#glow)" />
-    </Svg>
+      <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+        <Defs>
+          <RadialGradient id="glow" cx="50%" cy="50%" r="50%">
+            <Stop offset="0%" stopColor={C.brand} stopOpacity={0.34} />
+            <Stop offset="100%" stopColor={C.brand} stopOpacity={0} />
+          </RadialGradient>
+        </Defs>
+        <Rect x={0} y={0} width={width} height={height} fill={C.ink} />
+        {PEAKS.flatMap((p) =>
+          Array.from({ length: p.rings }, (_, i) => (
+            <Path
+              key={`${p.seed}-${i}`}
+              d={contourRing(p.x * width, p.y * height, 16 + i * 21, p.seed + i * 0.35)}
+              fill="none"
+              stroke="#FFFFFF"
+              strokeOpacity={0.065}
+              strokeWidth={0.8}
+            />
+          )),
+        )}
+        <Circle cx={width * 0.74} cy={height * 0.19} r={190} fill="url(#glow)" />
+      </Svg>
     </View>
+  );
+}
+
+/* ---------- Rota da capa: as paradas do relatório numa trilha ---------- */
+
+export function RoutePath({ points, width, height }: { points: { x: number; y: number }[]; width: number; height: number }) {
+  let d = `M ${points[0].x} ${points[0].y}`;
+  for (let i = 1; i < points.length; i++) {
+    const a = points[i - 1];
+    const b = points[i];
+    const mx = (a.x + b.x) / 2;
+    d += ` C ${mx} ${a.y}, ${mx} ${b.y}, ${b.x} ${b.y}`;
+  }
+  return (
+    <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+      <Path d={d} fill="none" stroke="#FFFFFF" strokeOpacity={0.08} strokeWidth={7} strokeLinecap="round" />
+      <Path d={d} fill="none" stroke={C.brand} strokeWidth={1.6} strokeLinecap="round" strokeDasharray="2.5 4" />
+    </Svg>
   );
 }

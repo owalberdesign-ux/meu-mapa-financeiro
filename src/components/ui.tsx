@@ -28,21 +28,29 @@ export function Logo({ href = "/" }: { href?: string }) {
   );
 }
 
-export function LogoMark({ className = "size-8" }: { className?: string }) {
+/** Mapa dobrado com a rota e o pin de destino. Em fundo escuro, o pin fica branco. */
+export function LogoMark({ className = "size-8", onDark = false }: { className?: string; onDark?: boolean }) {
   return (
-    <svg viewBox="0 0 32 32" className={className} aria-hidden="true">
-      <rect width="32" height="32" rx="9" fill="#141714" />
+    <svg viewBox="0 0 40 40" className={className} aria-hidden="true">
+      <path d="M4 13.5 14 9.5v22L4 35.5z" fill="#15803d" />
+      <path d="M14 9.5 26 13.5v22l-12-4z" fill="#22c55e" />
+      <path d="M26 13.5 36 9.5v22l-10 4z" fill="#166534" />
       <path
-        d="M8.5 23.5c4.5 0 3.5-8 8-8s3.5-6 7-6"
+        d="M8.2 29.6c3.4-1.6 4.6-4.9 8.2-5.2 3.5-.3 4.4 2.6 7.8 1.6 2.6-.8 3.5-3.6 5.4-5.4"
         fill="none"
-        stroke="#22c55e"
-        strokeWidth="2.2"
+        stroke="#ffffff"
+        strokeWidth="1.7"
         strokeLinecap="round"
-        strokeDasharray="0.1 4.2"
+        strokeDasharray="0.1 3"
       />
-      <circle cx="8.5" cy="23.5" r="2.2" fill="#ffffff" />
-      <circle cx="23.5" cy="9.5" r="3.4" fill="#22c55e" />
-      <circle cx="23.5" cy="9.5" r="1.3" fill="#141714" />
+      <circle cx="8.2" cy="29.6" r="1.7" fill="#ffffff" />
+      <path
+        d="M30 3.2c2.9 0 5.1 2.2 5.1 5 0 3.6-5.1 9.4-5.1 9.4s-5.1-5.8-5.1-9.4c0-2.8 2.2-5 5.1-5z"
+        fill={onDark ? "#ffffff" : "#141714"}
+        stroke={onDark ? "#141714" : "#f6f7f5"}
+        strokeWidth="1.4"
+      />
+      <circle cx="30" cy="8.2" r="1.8" fill="#22c55e" />
     </svg>
   );
 }

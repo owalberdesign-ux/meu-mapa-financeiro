@@ -29,10 +29,32 @@ export const TONE: Record<Status, { fill: string; strong: string; soft: string }
   risk: { fill: C.risk, strong: C.riskStrong, soft: C.riskSoft },
 };
 
+/* ---------- Peças 3D (PNG: o PDF não lê WebP), servidas de /public/3d ---------- */
+
+export const ART = {
+  map: [560, 396],
+  pin: [206, 288],
+  coins: [275, 336],
+  compass: [332, 336],
+  calendar: [311, 336],
+  flag: [227, 336],
+  sign: [203, 336],
+  binoculars: [343, 270],
+} as const satisfies Record<string, readonly [number, number]>;
+
+export type ArtName = keyof typeof ART;
+
+let assetOrigin = "";
+
+export function artSrc(name: ArtName) {
+  return `${assetOrigin}/3d/${name}.png`;
+}
+
 let registeredFor: string | null = null;
 
-/** Geist (SIL OFL) servida de /public/fonts. */
+/** Geist (SIL OFL) servida de /public/fonts; as peças 3D vêm da mesma origem. */
 export function registerFonts(origin: string) {
+  assetOrigin = origin;
   if (registeredFor === origin) return;
   const weights: [number, string][] = [
     [400, "Regular"],

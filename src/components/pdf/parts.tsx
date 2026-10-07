@@ -1,8 +1,8 @@
-import { Circle, Path, Rect, Svg, Text, View } from "@react-pdf/renderer";
+import { Circle, Image, Link, Path, Rect, Svg, Text, View } from "@react-pdf/renderer";
 import type { ReactNode } from "react";
 import type { Status } from "@/lib/report-insights";
 import { STATUS_LABEL } from "@/lib/report-insights";
-import { C, TONE, s } from "@/components/pdf/theme";
+import { ART, C, TONE, artSrc, s, type ArtName } from "@/components/pdf/theme";
 
 /* ---------- Ícones (traços Lucide, ISC) ---------- */
 
@@ -52,21 +52,29 @@ export function PdfIcon({
   );
 }
 
-export function LogoMark({ size = 22 }: { size?: number }) {
+/** Mapa dobrado com a rota e o pin de destino (mesmo desenho da interface). */
+export function LogoMark({ size = 22, onDark = false }: { size?: number; onDark?: boolean }) {
   return (
-    <Svg width={size} height={size} viewBox="0 0 32 32">
-      <Rect width={32} height={32} rx={9} fill={C.ink} />
+    <Svg width={size} height={size} viewBox="0 0 40 40">
+      <Path d="M4 13.5 14 9.5v22L4 35.5z" fill="#15803D" />
+      <Path d="M14 9.5 26 13.5v22l-12-4z" fill={C.brand} />
+      <Path d="M26 13.5 36 9.5v22l-10 4z" fill={C.brandDeep} />
       <Path
-        d="M8.5 23.5c4.5 0 3.5-8 8-8s3.5-6 7-6"
+        d="M8.2 29.6c3.4-1.6 4.6-4.9 8.2-5.2 3.5-.3 4.4 2.6 7.8 1.6 2.6-.8 3.5-3.6 5.4-5.4"
         fill="none"
-        stroke={C.brand}
-        strokeWidth={2.2}
+        stroke={C.surface}
+        strokeWidth={1.7}
         strokeLinecap="round"
-        strokeDasharray="0.1 4.2"
+        strokeDasharray="0.1 3"
       />
-      <Circle cx={8.5} cy={23.5} r={2.2} fill={C.surface} />
-      <Circle cx={23.5} cy={9.5} r={3.4} fill={C.brand} />
-      <Circle cx={23.5} cy={9.5} r={1.3} fill={C.ink} />
+      <Circle cx={8.2} cy={29.6} r={1.7} fill={C.surface} />
+      <Path
+        d="M30 3.2c2.9 0 5.1 2.2 5.1 5 0 3.6-5.1 9.4-5.1 9.4s-5.1-5.8-5.1-9.4c0-2.8 2.2-5 5.1-5z"
+        fill={onDark ? C.surface : C.ink}
+        stroke={onDark ? C.ink : C.surface}
+        strokeWidth={1.4}
+      />
+      <Circle cx={30} cy={8.2} r={1.8} fill={C.brand} />
     </Svg>
   );
 }
@@ -155,34 +163,92 @@ export function PageChrome({ name }: { name: string }) {
   );
 }
 
-export function SectionHeader({
-  id,
-  index,
-  title,
-  intro,
-}: {
-  id: string;
-  index: string;
-  title: string;
-  intro?: ReactNode;
-}) {
+/* ---------- A rota do relatório: as 7 paradas ---------- */
+
+export const STOPS: { id: string; title: string; art: ArtName }[] = [
+  { id: "resultado", title: "Seu resultado", art: "pin" },
+  { id: "renda", title: "Para onde vai sua renda", art: "coins" },
+  { id: "indicadores", title: "Seus indicadores", art: "compass" },
+  { id: "atencao", title: "Pontos de atenção", art: "sign" },
+  { id: "projecao", title: "Potencial e projeção", art: "binoculars" },
+  { id: "rota", title: "Sua rota", art: "map" },
+  { id: "plano", title: "Plano de 30 dias", art: "calendar" },
+];
+
+/** Peça 3D com a proporção certa: informe a altura ou a largura. */
+export function Art3D({ name, height, width }: { name: ArtName; height?: number; width?: number }) {
+  const [w, h] = ART[name];
+  const H = height ?? ((width ?? 60) * h) / w;
+  const W = width ?? (H * w) / h;
+  // Peça decorativa: o Image do react-pdf não tem texto alternativo.
+  // eslint-disable-next-line jsx-a11y/alt-text
+  return <Image src={artSrc(name)} style={{ width: W, height: H }} />;
+}
+
+/** Paradas clicáveis no topo de cada parte: a atual em destaque. */
+function RouteNav({ current }: { current: number }) {
+  return (
+    <View style={{ flexDirection: "row", alignItems: "center" }}>
+      {STOPS.map((stop, i) => {
+        const n = i + 1;
+        const done = n < current;
+        const here = n === current;
+        return (
+          <View key={stop.id} style={{ flexDirection: "row", alignItems: "center" }}>
+            {i > 0 ? (
+              <View
+                style={{
+                  width: 9,
+                  borderTopWidth: 1.4,
+                  borderStyle: "dashed",
+                  borderTopColor: n <= current ? C.brand : C.line,
+                  marginHorizontal: 2,
+                }}
+              />
+            ) : null}
+            <Link src={`#${stop.id}`} style={{ textDecoration: "none" }}>
+              <View
+                style={{
+                  width: here ? 17 : 13,
+                  height: here ? 17 : 13,
+                  borderRadius: 9,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: here ? C.brandStrong : done ? C.brandSoft : C.surface,
+                  borderWidth: here || done ? 0 : 1,
+                  borderColor: C.line,
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: here ? 7.5 : 6.5,
+                    fontWeight: 700,
+                    color: here ? C.surface : done ? C.brandDeep : C.muted,
+                  }}
+                >
+                  {n}
+                </Text>
+              </View>
+            </Link>
+          </View>
+        );
+      })}
+      <Text style={[s.eyebrow, { color: C.muted, marginLeft: 8 }]}>
+        Parada {current} de {STOPS.length}
+      </Text>
+    </View>
+  );
+}
+
+export function SectionHeader({ stop, title, intro }: { stop: number; title: string; intro?: ReactNode }) {
+  const { id, art } = STOPS[stop - 1];
   return (
     <View id={id} style={{ marginBottom: 18 }}>
-      <View style={{ flexDirection: "row", alignItems: "center" }}>
-        <View
-          style={{
-            backgroundColor: C.brandSoft,
-            borderRadius: 6,
-            paddingVertical: 3,
-            paddingHorizontal: 6,
-            marginRight: 8,
-          }}
-        >
-          <Text style={{ fontSize: 8, fontWeight: 700, color: C.brandDeep }}>{index}</Text>
-        </View>
-        <Text style={[s.eyebrow, { color: C.muted }]}>Parte {Number(index)} de 7</Text>
+      <View style={{ position: "absolute", top: -10, right: -4, width: 76, height: 62, alignItems: "flex-end", justifyContent: "flex-end" }}>
+        <Art3D name={art} height={art === "map" ? 50 : art === "binoculars" ? 46 : 60} />
       </View>
-      <Text style={[s.h1, { marginTop: 8 }]}>{title}</Text>
+      <RouteNav current={stop} />
+      <Text style={[s.h1, { marginTop: 8, paddingRight: 84 }]}>{title}</Text>
       {intro ? <Text style={[s.body, { marginTop: 6, fontSize: 10.5 }]}>{intro}</Text> : null}
     </View>
   );

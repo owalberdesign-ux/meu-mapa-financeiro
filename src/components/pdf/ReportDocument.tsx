@@ -19,22 +19,12 @@ import {
   summarySentence,
   type Status,
 } from "@/lib/report-insights";
-import { CoverBackdrop, Donut, MeterBar, PillarBar, ProfileScale, ScenarioChart, ScoreGauge } from "@/components/pdf/charts";
-import { CheckSquare, Dot, LogoMark, PageChrome, PdfIcon, SectionHeader, StatusChip } from "@/components/pdf/parts";
+import { CoverBackdrop, Donut, MeterBar, PillarBar, ProfileScale, RoutePath, ScenarioChart, ScoreGauge } from "@/components/pdf/charts";
+import { Art3D, CheckSquare, Dot, LogoMark, PageChrome, PdfIcon, STOPS, SectionHeader, StatusChip } from "@/components/pdf/parts";
 import { C, TONE, s } from "@/components/pdf/theme";
 
 const A4 = { width: 595.28, height: 841.89 };
 const money = (v: number) => (v < 0 ? `−${brl(-v)}` : brl(v));
-
-const SECTIONS: [string, string][] = [
-  ["resultado", "Seu resultado"],
-  ["renda", "Para onde vai sua renda"],
-  ["indicadores", "Seus indicadores"],
-  ["atencao", "Pontos de atenção"],
-  ["projecao", "Potencial de ajuste e projeção"],
-  ["rota", "Sua rota"],
-  ["plano", "Plano de 30 dias"],
-];
 
 function problemStatus(problem: Diagnostic["report"]["primaryProblem"]): Status {
   if (problem === "DEFICIT" || problem === "DEBT") return "risk";
@@ -42,6 +32,44 @@ function problemStatus(problem: Diagnostic["report"]["primaryProblem"]): Status 
 }
 
 /* ---------------- 1. Capa ---------------- */
+
+const COVER_W = A4.width - 88;
+
+function CoverRoute() {
+  const col = COVER_W / STOPS.length;
+  const points = STOPS.map((_, i) => ({ x: col * (i + 0.5), y: 12 + (i % 2 ? 16 : 0) }));
+  return (
+    <View style={{ height: 96 }}>
+      <View style={{ position: "absolute", top: 0, left: 0 }}>
+        <RoutePath points={points} width={COVER_W} height={40} />
+      </View>
+      <View style={{ flexDirection: "row" }}>
+        {STOPS.map((stop, i) => (
+          <Link key={stop.id} src={`#${stop.id}`} style={{ width: col, textDecoration: "none", color: C.surface }}>
+            <View style={{ alignItems: "center", paddingTop: points[i].y - 12, paddingHorizontal: 3 }}>
+              <View
+                style={{
+                  width: 24,
+                  height: 24,
+                  borderRadius: 12,
+                  backgroundColor: i === STOPS.length - 1 ? C.brand : "#1E2420",
+                  borderWidth: 1.5,
+                  borderColor: C.brand,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Text style={{ fontSize: 9.5, fontWeight: 700, color: i === STOPS.length - 1 ? C.ink : C.surface }}>{i + 1}</Text>
+              </View>
+              <Text style={{ fontSize: 7.6, lineHeight: 1.3, textAlign: "center", marginTop: 6 }}>{stop.title}</Text>
+              <Text style={{ fontSize: 6.5, color: "#8C938D", marginTop: 2 }}>pág. {i + 2}</Text>
+            </View>
+          </Link>
+        ))}
+      </View>
+    </View>
+  );
+}
 
 function Cover({ d }: { d: Diagnostic }) {
   const r = d.report;
@@ -58,46 +86,48 @@ function Cover({ d }: { d: Diagnostic }) {
       <View style={{ padding: 44, flexGrow: 1 }}>
         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <LogoMark size={24} />
+            <LogoMark size={26} onDark />
             <Text style={{ marginLeft: 8, fontSize: 8, fontWeight: 600, letterSpacing: 2 }}>MEU MAPA FINANCEIRO</Text>
           </View>
           <Text style={{ fontSize: 8.5, color: "#A7ADA8" }}>{shortDate(d.createdAt)}</Text>
         </View>
 
-        <View style={{ marginTop: 56 }}>
-          <Text style={{ fontSize: 11, color: "#A7ADA8" }}>Diagnóstico financeiro de</Text>
-          <Text style={{ fontSize: 34, fontWeight: 600, letterSpacing: -1.2, marginTop: 4, lineHeight: 1.1 }}>{d.name}</Text>
-          <Text style={{ fontSize: 10.5, color: "#C9CEC9", marginTop: 10, width: 360, lineHeight: 1.5 }}>
-            Um retrato do seu mês, com o que mais pesa, quanto pode melhorar e um plano para os próximos 30 dias.
-          </Text>
-        </View>
-
-        <View style={{ alignItems: "center", marginTop: 34 }}>
-          <Text style={{ fontSize: 7.5, fontWeight: 600, letterSpacing: 1.6, color: "#A7ADA8", marginBottom: 10 }}>SEU SCORE</Text>
-          <ScoreGauge score={r.score} color={tone.fill} width={250} stroke={18} track="#2A302B" textColor={C.surface} subColor="#A7ADA8" />
-          <View
-            style={{
-              marginTop: 12,
-              flexDirection: "row",
-              alignItems: "center",
-              backgroundColor: tone.fill,
-              borderRadius: 20,
-              paddingVertical: 4,
-              paddingHorizontal: 10,
-            }}
-          >
-            <PdfIcon name={PROFILE_TONE[r.profile]} size={9} color={C.ink} strokeWidth={2.4} />
-            <Text style={{ marginLeft: 5, fontSize: 8, fontWeight: 700, letterSpacing: 0.8, color: C.ink }}>
-              {PROFILE_LABEL[r.profile].toUpperCase()}
+        <View style={{ flexDirection: "row", alignItems: "center", marginTop: 40 }}>
+          <View style={{ flex: 1, paddingRight: 10 }}>
+            <Text style={{ fontSize: 11, color: "#A7ADA8" }}>O mapa financeiro de</Text>
+            <Text style={{ fontSize: 32, fontWeight: 600, letterSpacing: -1.1, marginTop: 4, lineHeight: 1.1 }}>{d.name}</Text>
+            <Text style={{ fontSize: 10.5, color: "#C9CEC9", marginTop: 10, lineHeight: 1.5 }}>
+              Onde você está hoje, o que mais pesa no seu mês e a rota, com prazos, até o seu objetivo.
             </Text>
           </View>
-          <Text style={{ marginTop: 16, fontSize: 7.5, fontWeight: 600, letterSpacing: 1.6, color: "#A7ADA8" }}>
-            SUA PRIORIDADE
-          </Text>
-          <Text style={{ marginTop: 4, fontSize: 17, fontWeight: 600 }}>{PRIORITY_LABEL[r.primaryProblem]}</Text>
+          <Art3D name="map" width={248} />
         </View>
 
-        <View style={{ flexDirection: "row", marginTop: 30 }}>
+        <View style={{ flexDirection: "row", alignItems: "center", marginTop: 40 }}>
+          <View style={{ width: 210, alignItems: "center" }}>
+            <Text style={{ fontSize: 7.5, fontWeight: 600, letterSpacing: 1.6, color: "#A7ADA8", marginBottom: 10 }}>SEU SCORE</Text>
+            <ScoreGauge score={r.score} color={tone.fill} width={196} stroke={16} track="#2A302B" textColor={C.surface} subColor="#A7ADA8" />
+          </View>
+          <View style={{ flex: 1, marginLeft: 22, paddingLeft: 22, borderLeftWidth: 1, borderLeftColor: "#2A302B" }}>
+            <View style={{ flexDirection: "row", alignItems: "center", alignSelf: "flex-start", backgroundColor: tone.fill, borderRadius: 20, paddingVertical: 4, paddingHorizontal: 10 }}>
+              <PdfIcon name={PROFILE_TONE[r.profile]} size={9} color={C.ink} strokeWidth={2.4} />
+              <Text style={{ marginLeft: 5, fontSize: 8, fontWeight: 700, letterSpacing: 0.8, color: C.ink }}>
+                {PROFILE_LABEL[r.profile].toUpperCase()}
+              </Text>
+            </View>
+            <Text style={{ marginTop: 16, fontSize: 7.5, fontWeight: 600, letterSpacing: 1.6, color: "#A7ADA8" }}>SUA PRIORIDADE</Text>
+            <Text style={{ marginTop: 4, fontSize: 17, fontWeight: 600, letterSpacing: -0.3 }}>{PRIORITY_LABEL[r.primaryProblem]}</Text>
+            <View style={{ flexDirection: "row", alignItems: "center", marginTop: 12 }}>
+              <Art3D name="flag" height={26} />
+              <View style={{ marginLeft: 8, flex: 1 }}>
+                <Text style={{ fontSize: 7.5, fontWeight: 600, letterSpacing: 1.6, color: "#A7ADA8" }}>SEU DESTINO</Text>
+                <Text style={{ fontSize: 10, marginTop: 2, color: "#E3E7E3" }}>{GOAL_LABEL[r.goal]}</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        <View style={{ flexDirection: "row", marginTop: 36 }}>
           {kpis.map(([label, value, note], i) => (
             <View
               key={label}
@@ -120,20 +150,11 @@ function Cover({ d }: { d: Diagnostic }) {
         </View>
 
         <View style={{ marginTop: "auto" }}>
-          <Text style={{ fontSize: 7.5, fontWeight: 600, letterSpacing: 1.6, color: "#A7ADA8", marginBottom: 8 }}>
-            NESTE RELATÓRIO
-          </Text>
-          <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
-            {SECTIONS.map(([id, title], i) => (
-              <Link key={id} src={`#${id}`} style={{ width: "50%", textDecoration: "none", color: C.surface }}>
-                <View style={{ flexDirection: "row", paddingVertical: 5, borderTopWidth: 1, borderTopColor: "#2A302B", marginRight: i % 2 ? 0 : 12 }}>
-                  <Text style={{ fontSize: 8.5, color: C.brand, width: 22 }}>{`0${i + 1}`}</Text>
-                  <Text style={{ fontSize: 8.5, flexGrow: 1 }}>{title}</Text>
-                  <Text style={{ fontSize: 8.5, color: "#8C938D" }}>{i + 2}</Text>
-                </View>
-              </Link>
-            ))}
+          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "baseline", marginBottom: 12 }}>
+            <Text style={{ fontSize: 7.5, fontWeight: 600, letterSpacing: 1.6, color: "#A7ADA8" }}>SUA ROTA NESTE MAPA</Text>
+            <Text style={{ fontSize: 7.5, color: "#8C938D" }}>Toque numa parada para ir direto a ela</Text>
           </View>
+          <CoverRoute />
         </View>
       </View>
     </Page>
@@ -150,7 +171,7 @@ function ResultPage({ d }: { d: Diagnostic }) {
   return (
     <Page size="A4" style={s.page}>
       <PageChrome name={d.name} />
-      <SectionHeader id="resultado" index="01" title="Seu resultado" intro={summarySentence(r)} />
+      <SectionHeader stop={1} title="Seu resultado" intro={summarySentence(r)} />
 
       <View style={{ flexDirection: "row" }}>
         <View style={[s.card, { width: 262, alignItems: "center" }]}>
@@ -231,7 +252,7 @@ function IncomePage({ d }: { d: Diagnostic }) {
   return (
     <Page size="A4" style={s.page}>
       <PageChrome name={d.name} />
-      <SectionHeader id="renda" index="02" title="Para onde vai sua renda" intro={intro} />
+      <SectionHeader stop={2} title="Para onde vai sua renda" intro={intro} />
 
       <View style={{ flexDirection: "row" }}>
         {kpis.map(([label, value, color], i) => (
@@ -297,8 +318,7 @@ function IndicatorsPage({ d }: { d: Diagnostic }) {
     <Page size="A4" style={s.page}>
       <PageChrome name={d.name} />
       <SectionHeader
-        id="indicadores"
-        index="03"
+        stop={3}
         title="Seus indicadores"
         intro="Cada número da sua vida financeira ao lado de uma referência. O traço escuro no medidor marca onde fica a referência."
       />
@@ -335,8 +355,7 @@ function AttentionPage({ d }: { d: Diagnostic }) {
     <Page size="A4" style={s.page}>
       <PageChrome name={d.name} />
       <SectionHeader
-        id="atencao"
-        index="04"
+        stop={4}
         title={r.alerts.length ? "Seus pontos de atenção" : "Nenhum ponto de atenção"}
         intro={
           r.alerts.length
@@ -436,8 +455,7 @@ function ProjectionPage({ d }: { d: Diagnostic }) {
     <Page size="A4" style={s.page}>
       <PageChrome name={d.name} />
       <SectionHeader
-        id="projecao"
-        index="05"
+        stop={5}
         title="Potencial de ajuste e projeção"
         intro="Com uma redução moderada dos gastos variáveis e preservando sua margem atual, existe espaço para melhorar seu fluxo mensal."
       />
@@ -592,9 +610,22 @@ function RouteRow({
           },
         ]}
       >
-        <Text style={[s.eyebrow, { color: kind === "start" ? C.muted : C.brandStrong }]}>{horizon}</Text>
-        <Text style={{ fontSize: 12, fontWeight: 600, marginTop: 3, letterSpacing: -0.2 }}>{title}</Text>
-        <Text style={[s.body, { fontSize: 9, marginTop: 1, lineHeight: 1.4 }]}>{detail}</Text>
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <View style={{ flex: 1 }}>
+            <Text style={[s.eyebrow, { color: kind === "start" ? C.muted : C.brandStrong }]}>{horizon}</Text>
+            <Text style={{ fontSize: 12, fontWeight: 600, marginTop: 3, letterSpacing: -0.2 }}>{title}</Text>
+            <Text style={[s.body, { fontSize: 9, marginTop: 1, lineHeight: 1.4 }]}>{detail}</Text>
+          </View>
+          {kind === "goal" ? (
+            <View style={{ marginLeft: 10 }}>
+              <Art3D name="flag" height={38} />
+            </View>
+          ) : kind === "start" ? (
+            <View style={{ marginLeft: 10 }}>
+              <Art3D name="pin" height={32} />
+            </View>
+          ) : null}
+        </View>
       </View>
     </View>
   );
@@ -607,8 +638,7 @@ function RoutePage({ d }: { d: Diagnostic }) {
     <Page size="A4" style={s.page}>
       <PageChrome name={d.name} />
       <SectionHeader
-        id="rota"
-        index="06"
+        stop={6}
         title="Sua rota"
         intro={`Do ponto em que você está até o seu objetivo: ${GOAL_LABEL[r.goal].toLowerCase()}. Cada etapa começa quando a anterior termina.`}
       />
@@ -648,8 +678,7 @@ function PlanPage({ d, reportUrl }: { d: Diagnostic; reportUrl: string }) {
     <Page size="A4" style={s.page}>
       <PageChrome name={d.name} />
       <SectionHeader
-        id="plano"
-        index="07"
+        stop={7}
         title={PLAN_TITLE[r.planFocus]}
         intro="Quatro semanas, cada uma com um objetivo, três tarefas com os seus números e uma meta para conferir. Marque o que for concluindo."
       />
