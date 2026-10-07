@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import type { Diagnostic } from "@/types/diagnostic";
 import { Icon } from "@/components/Icon";
 import { FullReport, LockedReport, PreviewResult, ReadyBanner } from "@/components/report";
-import { Logo, buttonClass } from "@/components/ui";
+import { Logo, buttonClass, buttonFullClass } from "@/components/ui";
 import { track } from "@/lib/analytics";
 import { buildCheckoutUrl, isCheckoutConfigured, PRICE_LABEL } from "@/lib/checkout";
 import { getDiagnostic, simulatePayment } from "@/lib/diagnostic-store";
@@ -112,7 +112,7 @@ function Preview({
         report={diagnostic.report}
         cta={
           <>
-            <button type="button" onClick={checkout} disabled={redirecting} className={`${buttonClass} sm:w-full`}>
+            <button type="button" onClick={checkout} disabled={redirecting} className={buttonFullClass}>
               {redirecting ? (
                 <>
                   <span className="size-5 animate-spin rounded-full border-2 border-white/40 border-t-white motion-reduce:animate-none" />

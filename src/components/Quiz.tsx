@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useSyncExternalStore, type FormEvent, type ReactNode } from "react";
 import type { Answers, Goal } from "@/types/diagnostic";
 import { Icon } from "@/components/Icon";
-import { Logo, buttonClass } from "@/components/ui";
+import { Logo, buttonFullClass } from "@/components/ui";
 import { track } from "@/lib/analytics";
 import { createDiagnostic } from "@/lib/diagnostic-store";
 import { thousands } from "@/lib/format";
@@ -314,7 +314,7 @@ function QuizFlow({ saved }: { saved: Saved | null }) {
           <ErrorText message={error} />
 
           <div className="mt-auto flex flex-col gap-3 pt-10">
-            <button type="submit" className={`${buttonClass} sm:w-full`}>
+            <button type="submit" className={buttonFullClass}>
               Ver meu pré-diagnóstico
               <Icon name="arrowRight" />
             </button>
@@ -369,7 +369,7 @@ function QuizFlow({ saved }: { saved: Saved | null }) {
           <ErrorText message={error} />
 
           <div className="mt-auto flex flex-col gap-3 pt-10">
-            <button type="submit" className={`${buttonClass} sm:w-full`}>
+            <button type="submit" className={buttonFullClass}>
               Continuar
               <Icon name="arrowRight" />
             </button>

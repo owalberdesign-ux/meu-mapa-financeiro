@@ -27,6 +27,11 @@ function useCountUp(target: number, enabled: boolean): number {
   return value;
 }
 
+/** Número que sobe de 0 até o valor ao aparecer. */
+export function CountUp({ value }: { value: number }) {
+  return <>{useCountUp(value, true)}</>;
+}
+
 export function ScoreCard({
   score,
   profile,

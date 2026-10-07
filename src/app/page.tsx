@@ -1,12 +1,22 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { Icon, type IconName } from "@/components/Icon";
-import { ScoreCard } from "@/components/ScoreCard";
 import { TrackView } from "@/components/TrackView";
-import { Card, Eyebrow, Logo, Stat, buttonClass } from "@/components/ui";
-import { brl, pct } from "@/lib/format";
+import { HeroMockup } from "@/components/landing/HeroMockup";
+import {
+  IncomeBar,
+  StepAnswer,
+  StepDiscover,
+  StepOrganize,
+  TileAlerts,
+  TilePdf,
+  TilePlan,
+  TileProjection,
+  TileScore,
+} from "@/components/landing/illustrations";
+import { StickyCta } from "@/components/landing/StickyCta";
+import { Logo, buttonClass, buttonFullClass } from "@/components/ui";
 import { DISCLAIMER } from "@/lib/legal";
-import { PRIORITY_LABEL } from "@/lib/report-builder";
-import { SAMPLE_DIAGNOSTIC } from "@/lib/sample";
 
 const HERO_BENEFITS = [
   "Score financeiro de 0 a 100",
@@ -34,23 +44,25 @@ const PAINS: { icon: IconName; title: string; text: string }[] = [
   },
 ];
 
-const STEPS = [
+const STEPS: { title: string; text: string; art: ReactNode }[] = [
   {
     title: "Responda",
     text: "Informe renda, despesas, parcelas, dívidas e objetivo.",
+    art: <StepAnswer />,
   },
   {
     title: "Descubra",
     text: "O sistema calcula seu score e identifica sua principal prioridade.",
+    art: <StepDiscover />,
   },
   {
     title: "Organize",
     text: "Receba seu diagnóstico completo e um plano de ação de 30 dias.",
+    art: <StepOrganize />,
   },
 ];
 
-const DELIVERABLES = [
-  "Score financeiro de 0 a 100",
+const ALSO_INCLUDED = [
   "Perfil financeiro",
   "Renda x despesas",
   "Margem mensal",
@@ -59,10 +71,14 @@ const DELIVERABLES = [
   "Situação das dívidas",
   "Taxa de poupança",
   "Reserva disponível",
-  "3 principais pontos de atenção",
-  "Projeção de 3, 6 e 12 meses",
-  "Plano de ação de 30 dias",
-  "PDF personalizado",
+];
+
+const UNLOCKS = [
+  "Seus 3 maiores pontos de atenção",
+  "Quanto você pode recuperar por mês",
+  "Sua projeção de 3, 6 e 12 meses",
+  "Seu plano personalizado de 30 dias",
+  "Seu relatório completo em PDF",
 ];
 
 const OFFER_INFO: { icon: IconName; text: string }[] = [
@@ -93,49 +109,59 @@ const FAQ = [
   { q: "Preciso criar conta?", a: "Não." },
 ];
 
-function CheckItem({ children }: { children: React.ReactNode }) {
+function StartLink({ children, full = false }: { children: ReactNode; full?: boolean }) {
   return (
-    <li className="flex items-start gap-3">
-      <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-brand-soft text-brand-strong">
-        <Icon name="check" className="size-3.5" strokeWidth={3} />
-      </span>
-      <span>{children}</span>
-    </li>
-  );
-}
-
-function StartLink({ children }: { children: React.ReactNode }) {
-  return (
-    <Link href="/diagnostico" className={buttonClass}>
+    <Link href="/diagnostico" className={full ? buttonFullClass : `${buttonClass} sm:min-w-72`}>
       {children}
       <Icon name="arrowRight" className="size-5" />
     </Link>
   );
 }
 
-function HeroPreview() {
-  const { report } = SAMPLE_DIAGNOSTIC;
-  const m = report.metrics;
+function SectionHeading({
+  eyebrow,
+  title,
+  text,
+  dark = false,
+}: {
+  eyebrow: string;
+  title: string;
+  text?: string;
+  dark?: boolean;
+}) {
   return (
-    <div className="relative">
-      <div
-        aria-hidden="true"
-        className="absolute -inset-4 -z-10 rounded-[2.5rem] bg-[radial-gradient(60%_60%_at_70%_30%,#dcfce7_0%,transparent_70%)]"
-      />
-      <Card className="shadow-[0_24px_60px_-32px_rgba(20,23,20,0.35)]">
-        <p className="mb-5 text-[13px] font-medium text-muted">Exemplo de resultado</p>
-        <ScoreCard score={report.score} profile={report.profile} />
-        <div className="mt-5 grid grid-cols-2 gap-2.5">
-          <Stat label="Renda" value={brl(m.income)} />
-          <Stat label="Margem mensal" value={brl(m.monthlyMargin)} />
-          <Stat label="Renda comprometida" value={pct(m.commitmentRate)} />
-          <Stat
-            label="Prioridade"
-            value={PRIORITY_LABEL[report.primaryProblem]}
-            valueClassName="text-base leading-snug"
-          />
-        </div>
-      </Card>
+    <div className="max-w-2xl">
+      <p
+        className={`text-[13px] font-semibold uppercase tracking-[0.14em] ${dark ? "text-brand" : "text-brand-strong"}`}
+      >
+        {eyebrow}
+      </p>
+      <h2 className="mt-3 text-[2rem] font-semibold leading-[1.1] tracking-tight text-balance sm:text-[2.6rem]">
+        {title}
+      </h2>
+      {text ? (
+        <p className={`mt-4 text-lg leading-relaxed ${dark ? "text-white/70" : "text-muted"}`}>{text}</p>
+      ) : null}
+    </div>
+  );
+}
+
+function Tile({
+  title,
+  text,
+  className = "",
+  children,
+}: {
+  title: string;
+  text: string;
+  className?: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className={`reveal flex flex-col rounded-3xl bg-surface p-5 text-ink sm:p-6 ${className}`}>
+      <h3 className="text-[17px] font-semibold tracking-tight">{title}</h3>
+      <p className="mt-1 text-[14px] leading-snug text-muted">{text}</p>
+      <div className="mt-5 flex-1">{children}</div>
     </div>
   );
 }
@@ -144,12 +170,13 @@ export default function LandingPage() {
   return (
     <>
       <TrackView event="view_landing" />
+      <StickyCta />
 
       <header className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
         <Logo />
         <Link
           href="/diagnostico"
-          className="hidden rounded-xl px-4 py-2 text-sm font-semibold text-brand-strong hover:bg-brand-soft sm:inline-flex"
+          className="rounded-xl px-3 py-2 text-sm font-semibold whitespace-nowrap text-brand-strong hover:bg-brand-soft max-[399px]:hidden"
         >
           Fazer meu Raio-X
         </Link>
@@ -157,137 +184,223 @@ export default function LandingPage() {
 
       <main>
         {/* 01 — Hero */}
-        <section className="mx-auto grid max-w-6xl gap-10 px-4 pt-6 pb-16 sm:px-6 lg:grid-cols-[1.05fr_1fr] lg:items-center lg:gap-16 lg:pt-14 lg:pb-24">
-          <div>
-            <Eyebrow>Raio-X do Dinheiro</Eyebrow>
-            <h1 className="mt-4 text-[2.5rem] font-semibold leading-[1.05] tracking-tight text-balance sm:text-6xl">
-              Seu salário some e você não sabe onde foi parar?
-            </h1>
-            <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted">
-              Descubra como está sua vida financeira, quanto da sua renda já está comprometida e
-              qual deve ser sua prioridade nos próximos 30 dias.
-            </p>
-            <ul className="mt-6 space-y-2.5 text-[16px]">
-              {HERO_BENEFITS.map((b) => (
-                <CheckItem key={b}>{b}</CheckItem>
-              ))}
-            </ul>
-            <div className="mt-8">
-              <StartLink>Fazer meu Raio-X</StartLink>
-              <p className="mt-3 flex items-center gap-2 text-sm text-muted">
-                <Icon name="shield" className="size-4 shrink-0" />
-                Leva cerca de 3 minutos. Sem conectar sua conta bancária.
+        <section className="relative isolate overflow-hidden">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 -z-10 bg-grid [mask-image:radial-gradient(ellipse_90%_70%_at_60%_10%,black_20%,transparent_75%)]"
+          />
+          <div className="mx-auto grid max-w-6xl gap-6 px-4 pt-6 pb-16 sm:px-6 lg:grid-cols-[1.05fr_1fr] lg:items-center lg:gap-12 lg:pt-12 lg:pb-24">
+            <div>
+              <p className="inline-flex items-center gap-2 rounded-full border border-line bg-surface/80 py-1 pr-3.5 pl-2.5 text-[13px] font-medium shadow-sm backdrop-blur">
+                <span className="relative flex size-2">
+                  <span className="absolute inline-flex size-full animate-ping rounded-full bg-brand opacity-60 motion-reduce:animate-none" />
+                  <span className="relative inline-flex size-2 rounded-full bg-brand" />
+                </span>
+                Diagnóstico financeiro personalizado
               </p>
+              <h1 className="mt-5 text-[2.6rem] font-semibold leading-[1.02] tracking-[-0.035em] text-balance sm:text-[4.2rem]">
+                Seu salário{" "}
+                <span className="bg-linear-to-r from-ink from-20% to-ink/15 bg-clip-text text-transparent">
+                  some
+                </span>{" "}
+                e você não sabe onde foi parar?
+              </h1>
+              <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted sm:text-xl">
+                Descubra como está sua vida financeira, quanto da sua renda já está comprometida e qual
+                deve ser sua prioridade nos próximos 30 dias.
+              </p>
+              <ul className="mt-6 grid gap-2 text-[15px] sm:grid-cols-2 sm:gap-x-6">
+                {HERO_BENEFITS.map((b) => (
+                  <li key={b} className="flex items-center gap-2.5">
+                    <span className="grid size-5 shrink-0 place-items-center rounded-full bg-brand-strong text-white">
+                      <Icon name="check" className="size-3" strokeWidth={3.5} />
+                    </span>
+                    {b}
+                  </li>
+                ))}
+              </ul>
+              <div id="hero-cta" className="mt-8">
+                <StartLink>Fazer meu Raio-X</StartLink>
+                <p className="mt-3 flex items-center gap-2 text-sm text-muted">
+                  <Icon name="shield" className="size-4 shrink-0 text-brand-strong" />
+                  Leva cerca de 3 minutos. Sem conectar sua conta bancária.
+                </p>
+              </div>
             </div>
+            <HeroMockup />
           </div>
-          <HeroPreview />
         </section>
 
         {/* 02 — Dor */}
         <section className="border-y border-line bg-surface">
-          <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-24">
-            <h2 className="max-w-2xl text-3xl font-semibold leading-tight tracking-tight text-balance sm:text-4xl">
-              Você não precisa ganhar mais para começar a entender o problema.
-            </h2>
-            <p className="mt-4 max-w-2xl text-lg leading-relaxed text-muted">
-              Muitas vezes, o problema não é apenas quanto entra. É quanto da sua renda já está
-              comprometida antes mesmo do mês começar.
-            </p>
-            <div className="mt-10 grid gap-3 sm:grid-cols-3 sm:gap-4">
-              {PAINS.map((p) => (
-                <div key={p.title} className="rounded-3xl bg-canvas p-6">
-                  <span className="grid size-11 place-items-center rounded-2xl bg-surface text-ink shadow-sm">
-                    <Icon name={p.icon} />
-                  </span>
-                  <h3 className="mt-5 text-lg font-semibold">{p.title}</h3>
-                  <p className="mt-1.5 leading-relaxed text-muted">{p.text}</p>
-                </div>
-              ))}
+          <div className="mx-auto grid max-w-6xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:items-center lg:gap-16 lg:py-24">
+            <div>
+              <SectionHeading
+                eyebrow="O problema"
+                title="Você não precisa ganhar mais para começar a entender o problema."
+                text="Muitas vezes, o problema não é apenas quanto entra. É quanto da sua renda já está comprometida antes mesmo do mês começar."
+              />
+              <ul className="mt-8 space-y-5">
+                {PAINS.map((p) => (
+                  <li key={p.title} className="reveal flex gap-4">
+                    <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-canvas text-ink">
+                      <Icon name={p.icon} />
+                    </span>
+                    <div>
+                      <h3 className="text-[17px] font-semibold">{p.title}</h3>
+                      <p className="mt-0.5 leading-relaxed text-muted">{p.text}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="reveal">
+              <IncomeBar />
             </div>
           </div>
         </section>
 
         {/* 03 — Como funciona */}
         <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-24">
-          <h2 className="max-w-2xl text-3xl font-semibold leading-tight tracking-tight text-balance sm:text-4xl">
-            Em poucos minutos você entende sua situação.
-          </h2>
-          <ol className="mt-10 grid gap-3 sm:grid-cols-3 sm:gap-4">
+          <SectionHeading eyebrow="Como funciona" title="Em poucos minutos você entende sua situação." />
+          <ol className="mt-10 grid gap-4 md:grid-cols-3">
             {STEPS.map((s, i) => (
-              <li key={s.title} className="rounded-3xl border border-line bg-surface p-6">
-                <span className="text-sm font-semibold tabular-nums text-brand-strong">
-                  0{i + 1}
-                </span>
-                <h3 className="mt-3 text-lg font-semibold">{s.title}</h3>
+              <li key={s.title} className="reveal rounded-3xl border border-line bg-surface p-5 sm:p-6">
+                {s.art}
+                <p className="mt-6 text-sm font-semibold tabular-nums text-brand-strong">0{i + 1}</p>
+                <h3 className="mt-1 text-xl font-semibold tracking-tight">{s.title}</h3>
                 <p className="mt-1.5 leading-relaxed text-muted">{s.text}</p>
               </li>
             ))}
           </ol>
-          <div className="mt-8">
+          <div className="mt-10">
             <StartLink>Começar meu diagnóstico</StartLink>
           </div>
         </section>
 
         {/* 04 — O que o cliente recebe */}
-        <section className="border-y border-line bg-surface">
-          <div className="mx-auto grid max-w-6xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:py-24">
-            <div>
-              <h2 className="text-3xl font-semibold leading-tight tracking-tight text-balance sm:text-4xl">
-                Seu Raio-X mostra o que os números estão dizendo.
-              </h2>
-              <p className="mt-4 text-lg leading-relaxed text-muted">
-                Tudo calculado a partir das suas respostas, sem acesso ao seu banco.
-              </p>
+        <section className="relative isolate overflow-hidden bg-ink text-white">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 -z-10 bg-grid-light [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,black,transparent)]"
+          />
+          <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-24">
+            <SectionHeading
+              dark
+              eyebrow="O que você recebe"
+              title="Seu Raio-X mostra o que os números estão dizendo."
+              text="Um relatório feito a partir das suas respostas, com cada número explicado e o que fazer com ele."
+            />
+            <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:grid-rows-2">
+              <Tile
+                title="Score de 0 a 100"
+                text="Seu perfil financeiro em uma escala simples."
+                className="sm:col-span-2 lg:col-span-1 lg:row-span-2"
+              >
+                <TileScore />
+              </Tile>
+              <Tile title="3 principais pontos de atenção" text="O que mais pesa no seu mês, em ordem.">
+                <TileAlerts />
+              </Tile>
+              <Tile title="Projeção de 3, 6 e 12 meses" text="Quanto pode ficar com você com ajustes possíveis.">
+                <TileProjection />
+              </Tile>
+              <Tile title="Plano de ação de 30 dias" text="Uma tarefa clara para cada semana.">
+                <TilePlan />
+              </Tile>
+              <Tile title="PDF personalizado" text="Seu relatório para salvar, imprimir ou rever depois.">
+                <div className="grid h-full min-h-48 place-items-center">
+                  <TilePdf />
+                </div>
+              </Tile>
             </div>
-            <ul className="grid gap-x-8 gap-y-3.5 text-[16px] sm:grid-cols-2">
-              {DELIVERABLES.map((d) => (
-                <CheckItem key={d}>{d}</CheckItem>
-              ))}
-            </ul>
+            <div className="mt-8">
+              <p className="text-sm text-white/60">E também:</p>
+              <ul className="mt-3 flex flex-wrap gap-2">
+                {ALSO_INCLUDED.map((item) => (
+                  <li
+                    key={item}
+                    className="flex items-center gap-1.5 rounded-full border border-white/15 px-3 py-1.5 text-[14px] text-white/85"
+                  >
+                    <Icon name="check" className="size-3.5 text-brand" strokeWidth={3} />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </section>
 
         {/* 05 — Oferta */}
-        <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-24">
-          <div className="mx-auto max-w-xl rounded-[2rem] bg-ink p-7 text-white sm:p-10">
-            <h2 className="text-3xl font-semibold leading-tight tracking-tight">
-              Desbloqueie seu Raio-X completo
-            </h2>
-            <p className="mt-6 flex items-baseline gap-1">
-              <span className="text-2xl font-medium text-white/70">R$</span>
-              <span className="text-7xl font-semibold tracking-tighter">37</span>
-            </p>
-            <p className="mt-4 leading-relaxed text-white/75">
-              Um diagnóstico personalizado da sua situação financeira, com prioridades claras e
-              um plano simples para os próximos 30 dias.
-            </p>
-            <div className="mt-8 [&>a]:w-full">
-              <StartLink>Quero ver meu Raio-X completo</StartLink>
+        <section id="oferta" className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-24">
+          <div className="reveal relative isolate grid overflow-hidden rounded-[2rem] bg-ink text-white lg:grid-cols-[1.1fr_1fr]">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 -z-10 bg-grid-light [mask-image:linear-gradient(to_bottom,black,transparent)]"
+            />
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -top-24 -right-24 -z-10 size-80 rounded-full bg-brand/30 blur-3xl"
+            />
+            <div className="p-7 sm:p-10">
+              <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-brand">
+                Pagamento único
+              </p>
+              <h2 className="mt-3 text-[2rem] font-semibold leading-tight tracking-tight sm:text-4xl">
+                Desbloqueie seu Raio-X completo
+              </h2>
+              <p className="mt-6 flex items-start gap-1.5 leading-none">
+                <span className="mt-3 text-2xl font-medium text-white/70">R$</span>
+                <span className="text-8xl font-semibold tracking-tighter">37</span>
+              </p>
+              <p className="mt-5 max-w-md leading-relaxed text-white/75">
+                Um diagnóstico personalizado da sua situação financeira, com prioridades claras e um
+                plano simples para os próximos 30 dias.
+              </p>
+              <div className="mt-8">
+                <StartLink full>Quero ver meu Raio-X completo</StartLink>
+              </div>
+              <ul className="mt-6 grid gap-3 text-[14px] text-white/75 sm:grid-cols-2">
+                {OFFER_INFO.map((o) => (
+                  <li key={o.text} className="flex items-center gap-2.5">
+                    <Icon name={o.icon} className="size-4 shrink-0 text-brand" />
+                    {o.text}
+                  </li>
+                ))}
+              </ul>
             </div>
-            <ul className="mt-7 grid gap-3 text-[15px] text-white/80 sm:grid-cols-2">
-              {OFFER_INFO.map((o) => (
-                <li key={o.text} className="flex items-center gap-2.5">
-                  <Icon name={o.icon} className="size-4 shrink-0 text-brand" />
-                  {o.text}
-                </li>
-              ))}
-            </ul>
+            <div className="border-t border-white/10 p-7 sm:p-10 lg:border-t-0 lg:border-l">
+              <p className="text-[15px] font-semibold">Ao desbloquear, você vê:</p>
+              <ul className="mt-5 space-y-3">
+                {UNLOCKS.map((u) => (
+                  <li key={u} className="flex items-center gap-3 rounded-2xl bg-white/5 px-4 py-3.5 text-[15px]">
+                    <span className="grid size-7 shrink-0 place-items-center rounded-full bg-brand text-ink">
+                      <Icon name="check" className="size-4" strokeWidth={3} />
+                    </span>
+                    {u}
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-6 flex items-center gap-2 text-[13px] text-white/60">
+                <Icon name="shield" className="size-4 shrink-0" />
+                Seu score e o pré-diagnóstico aparecem antes do pagamento.
+              </p>
+            </div>
           </div>
         </section>
 
         {/* 06 — FAQ */}
         <section className="border-t border-line bg-surface">
-          <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:py-24">
-            <h2 className="text-3xl font-semibold tracking-tight">Perguntas frequentes</h2>
-            <div className="mt-8 divide-y divide-line border-y border-line">
+          <div className="mx-auto grid max-w-6xl gap-8 px-4 py-16 sm:px-6 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16 lg:py-24">
+            <SectionHeading eyebrow="Dúvidas" title="Perguntas frequentes" />
+            <div className="space-y-2.5">
               {FAQ.map((f) => (
-                <details key={f.q} className="group py-1">
-                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-4 text-[17px] font-medium [&::-webkit-details-marker]:hidden">
+                <details key={f.q} className="group rounded-2xl bg-canvas px-5 open:bg-surface open:ring-1 open:ring-line">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-4.5 text-[17px] font-medium [&::-webkit-details-marker]:hidden">
                     {f.q}
-                    <Icon
-                      name="chevronDown"
-                      className="size-5 shrink-0 text-muted transition group-open:rotate-180"
-                    />
+                    <span className="grid size-8 shrink-0 place-items-center rounded-full bg-surface text-muted transition group-open:rotate-180 group-open:bg-canvas">
+                      <Icon name="chevronDown" className="size-4" />
+                    </span>
                   </summary>
                   <p className="pb-5 leading-relaxed text-muted">{f.a}</p>
                 </details>
@@ -297,7 +410,7 @@ export default function LandingPage() {
         </section>
       </main>
 
-      <footer className="border-t border-line">
+      <footer className="border-t border-line pb-24 sm:pb-0">
         <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
           <Logo />
           <p className="mt-5 max-w-3xl text-[13px] leading-relaxed text-muted">{DISCLAIMER}</p>

@@ -7,6 +7,9 @@ export type Tone = "risk" | "attention" | "good";
 export const buttonClass =
   "inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-brand-strong px-5 py-3 text-center text-[15px] leading-tight font-semibold uppercase tracking-wide text-balance text-white shadow-[0_1px_0_rgba(0,0,0,0.08),0_8px_24px_-12px_rgba(21,128,61,0.7)] transition hover:bg-brand-deep active:scale-[0.99] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-strong disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto";
 
+/** Mesmo botão, ocupando a largura toda em qualquer tela. */
+export const buttonFullClass = buttonClass.replace(" sm:w-auto", "");
+
 export const secondaryButtonClass =
   "inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-line bg-surface px-5 text-[15px] font-semibold text-ink transition hover:border-ink/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-strong sm:w-auto";
 
@@ -18,7 +21,7 @@ export function Logo({ href = "/" }: { href?: string }) {
       aria-label="Raio-X do Dinheiro — início"
     >
       <LogoMark />
-      <span className="text-[15px] font-semibold tracking-tight">
+      <span className="text-[15px] font-semibold tracking-tight whitespace-nowrap">
         Raio-X <span className="font-normal text-muted">do Dinheiro</span>
       </span>
     </Link>
@@ -65,12 +68,22 @@ export function ToneLabel({ tone, children }: { tone: Tone; children: ReactNode 
   );
 }
 
-export function StatusBadge({ tone, children }: { tone: Tone; children: ReactNode }) {
+export function StatusBadge({
+  tone,
+  compact = false,
+  children,
+}: {
+  tone: Tone;
+  compact?: boolean;
+  children: ReactNode;
+}) {
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[13px] font-semibold uppercase tracking-wide ${TONE_BADGE[tone]}`}
+      className={`inline-flex items-center rounded-full font-semibold whitespace-nowrap uppercase tracking-wide ${TONE_BADGE[tone]} ${
+        compact ? "gap-1 px-2 py-0.5 text-[9px]" : "gap-1.5 px-3 py-1 text-[13px]"
+      }`}
     >
-      <Icon name={TONE_ICON[tone]} className="size-4" strokeWidth={2.2} />
+      <Icon name={TONE_ICON[tone]} className={compact ? "size-3" : "size-4"} strokeWidth={2.2} />
       {children}
     </span>
   );
